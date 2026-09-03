@@ -40,7 +40,7 @@ You'll need:
   up this exercise.
 - The legacy pipeline (this repo's `bronze/`/`silver/`/`gold/` notebooks)
   already deployed and run at least once against `qubika-training`, so
-  there's a real, already-running job to join — see
-  `SENDER-CHECKLIST.md` if that hasn't happened yet.
+  there's a real, already-running job to join. If that hasn't happened
+  yet, ask whoever set up this exercise.
 
 Then open `WALKTHROUGH.md` and go.
