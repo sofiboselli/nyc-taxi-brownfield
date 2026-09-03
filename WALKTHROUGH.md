@@ -21,7 +21,8 @@ Silver → Gold pipeline for a one-off executive demo, using flat
 `bronze/` / `silver/` / `gold/` notebooks and a job thrown together with
 no real project bundle behind it. It still runs. Nobody who currently
 works here wrote it. You'll deploy the exact same starting state yourself
-in Step 2, via `seed/` — a throwaway bundle whose only job is to
+in Step 2, via the seed bundle (`databricks.yml` + `resources/legacy_infra.yml`
+at the repo root, see `SEED.md`) — a throwaway deploy whose only job is to
 materialize this mess for real, so it's something you can actually
 inspect and run, not just read about.
 
@@ -47,10 +48,11 @@ inspect and run, not just read about.
   with no snapshot/partition column, so there's no history — last month's
   numbers are gone the moment this month's run finishes. No table or
   column comments either.
-- **Deployment:** no project bundle, no dev/staging/prod targets — just a
-  job deployed once via `seed/` (see below) and left alone. `seed/` isn't
-  the project bundle either; it's disposable infrastructure that exists
-  only to stand this state up.
+- **Deployment:** no real project bundle, no dev/staging/prod targets —
+  just a job deployed once via the throwaway seed bundle (see below) and
+  left alone. That seed bundle isn't the project bundle either; it's
+  disposable infrastructure that exists only to stand this state up, and
+  gets replaced wholesale in Iteration 1.
 - **Governance:** the job is owned by whoever deployed it — one
   individual's account, not a group. No tags, no failure-alert
   notifications, no autotermination on the cluster.
@@ -82,51 +84,39 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 
 ### 2. Local Repository Setup — and standing up the mess you're about to join
 
-- 2.1 Clone the repo:
+- 2.1 Clone the repo and launch Claude Code from the root — one session,
+  used for the rest of this walkthrough:
   ```
   git clone https://github.com/sofiboselli/nyc-taxi-brownfield.git
   cd nyc-taxi-brownfield
-  ```
-
-- 2.2 `cd` into `seed/` and start Claude Code from there
-  ```
-  cd seed
   claude
   ```
-- 2.3 Authenticate the Databricks CLI against `qubika-training` — run
+
+- 2.2 Authenticate the Databricks CLI against `qubika-training` — run
   `/de-databricks-setup`, the kit's own setup command, and follow the
   prompts. It writes a profile to `~/.databrickscfg` and validates it for
   you. If you already have a working profile for this workspace, skip
   this.
 
-- 2.4 Open a new terminal tab/window — the rest of Step 2 is plain
-  Databricks CLI, no Claude Code needed, so there's no reason to fight
-  with running raw shell commands inside an interactive session. `cd`
-  into `seed/` there too, then deploy the bundle:
+- 2.3 Deploy the seed bundle — `databricks.yml` + `resources/legacy_infra.yml`
+  at the repo root (see `SEED.md`). Ask Claude Code to run it, or use a
+  terminal directly:
   ```
-  cd nyc-taxi-brownfield/seed
   databricks bundle deploy -t dev
   ```
-- 2.5 Land the sample data into the volume the seed bundle just created
-  (commands in `seed/README.md`), then run the legacy job once:
+- 2.4 Land the sample data into the volume the seed bundle just created
+  (commands in `SEED.md`), then run the legacy job once:
   ```
   databricks bundle run legacy_taxi_job -t dev
   ```
   At this point `dev_ai_kit_demo_brownfield.taxi_legacy` has real tables
   in it, produced by a real (if badly configured) job — the same thing a
   brownfield engineer would find on day one, except you now know exactly
-  how it was made, which `seed/README.md` documents in full.
-
-- 2.6 In that same terminal, go back to the repo root — Step 3 starts a
-  fresh Claude Code session there, scoped to the root, for the same
-  reason as 2.2:
-  ```
-  cd ..
-  ```
+  how it was made, which `SEED.md` documents in full.
 
 ### 3. Onboarding with Claude Code
 
-- 3.1 Launch Claude Code in VS Code, inside the cloned repo.
+- 3.1 Same Claude Code session as Step 2 — nothing new to launch.
 - 3.2 Run `/de-init`. Because the folder already has content in flat
   `bronze/` / `silver/` / `gold/` directories — the kit's own signal for
   "this is the legacy pre-bundle layout" — detection kicks in
@@ -136,11 +126,13 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   (a prioritized punch list).
 
 - 3.3 Read the top priorities `/de-init` surfaces. `/de-audit`'s scope is
-  governance and drift — ownership gaps, missing `databricks.yml`/`CLAUDE.md`,
-  stale jobs, comment coverage — so expect it to catch the individual-owner
-  problem and the missing bundle, not the Bronze/Silver/Gold code issues.
-  It doesn't check data-quality posture or code-level conventions yet
-  (that's documented in its own command reference, not a guess).
+  governance and drift — ownership gaps, missing `CLAUDE.md`, stale jobs,
+  comment coverage — so expect it to catch the individual-owner problem
+  and note there's no `CLAUDE.md`. It'll see the seed bundle's
+  `databricks.yml` and count its resources, but it doesn't read whether a
+  bundle is *structured* well (no `src/`, no real targets, no
+  `resources/` beyond the one throwaway file) or check the
+  Bronze/Silver/Gold code issues — that's `/de-assist review`, next.
 
 > `/de-init` is
 > a small deterministic script (`scripts/init/detect.py`) that checks for
@@ -174,11 +166,14 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 - 4.1 Take what `/de-assist review` reported for `bronze/ingest_trips.py`
   — plain batch read instead of Auto Loader, no `_ingested_at` /
   `_source_file`, catalog hardcoded — and ask Claude Code to fix it inside
-  a proper Databricks Asset Bundle: `databricks.yml` + `resources/` +
-  `src/ingest/`. The catalog stays `dev_ai_kit_demo_brownfield` (pulled
-  into a `${var.catalog}` bundle variable instead of hardcoded), but the
-  target schema becomes `raw_main` — separate from the legacy pipeline's
-  `taxi_legacy` schema — so the new tables (`raw_main.yellow_trips`,
+  a proper Databricks Asset Bundle. `databricks.yml` already exists (the
+  seed bundle from Step 2) — this is where you replace its contents with
+  the real project bundle: proper `resources/` + `src/ingest/`, the seed's
+  one-off `legacy_infra.yml` resource gone. The catalog stays
+  `dev_ai_kit_demo_brownfield` (pulled into a `${var.catalog}` bundle
+  variable instead of hardcoded), but the target schema becomes
+  `raw_main` — separate from the legacy pipeline's `taxi_legacy` schema —
+  so the new tables (`raw_main.yellow_trips`,
   `raw_main.taxi_zone_lookup`) land alongside the old ones without
   colliding.
 

@@ -1,20 +1,19 @@
-# Seed bundle
+# Seeding the brownfield starting state
 
-Deploys the brownfield starting state for real, into the pre-provisioned
+`databricks.yml` + `resources/legacy_infra.yml` at the repo root deploy the
+brownfield starting state for real, into the pre-provisioned
 `dev_ai_kit_demo_brownfield` catalog: a `taxi_legacy` schema, a `landing`
-volume, and the "Taxi Analytics - Legacy" job wired to the three notebooks
-at the repo root (`bronze/`, `silver/`, `gold/`).
+volume, and the "Taxi Analytics - Legacy" job wired to the notebooks in
+`bronze/`, `silver/`, `gold/`.
 
-This is throwaway infrastructure-as-code — it exists so the messy starting
-point is real and reproducible instead of something someone had to
-manually click together in the UI ahead of time. It's not the project
-bundle, and nothing in the rest of the exercise builds on it. Once it's
-deployed and run once, leave it alone.
+This is throwaway infrastructure-as-code, run once at the start of the
+exercise. In Iteration 1 you replace it with the real project bundle —
+same filename (`databricks.yml`), different job. Nothing later in the
+exercise depends on `resources/legacy_infra.yml` still being there.
 
 ## Deploy it
 
 ```bash
-cd seed
 databricks bundle deploy -t dev
 ```
 
@@ -23,9 +22,9 @@ databricks bundle deploy -t dev
 The job reads from the volume this just created. Copy the sample data in:
 
 ```bash
-databricks fs cp ../sample_data/raw/yellow_tripdata_2024-01_sample.parquet \
+databricks fs cp sample_data/raw/yellow_tripdata_2024-01_sample.parquet \
   dbfs:/Volumes/dev_ai_kit_demo_brownfield/taxi_legacy/landing/yellow_tripdata_2024-01_sample.parquet
-databricks fs cp ../sample_data/raw/taxi_zone_lookup.csv \
+databricks fs cp sample_data/raw/taxi_zone_lookup.csv \
   dbfs:/Volumes/dev_ai_kit_demo_brownfield/taxi_legacy/landing/taxi_zone_lookup.csv
 ```
 

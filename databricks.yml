@@ -4,8 +4,14 @@
 # exists so anyone can materialize the brownfield starting state
 # themselves (schema, landing volume, the badly-configured job) instead of
 # depending on someone manually clicking through the Databricks UI first.
-# Deploy it once at the start of the exercise, then leave it alone — the
-# actual work is rebuilding what it creates, not maintaining this bundle.
+# Deploy it once at the start of the exercise, then leave it alone.
+#
+# It lives at the repo root (not a nested seed/ folder) because Databricks
+# Asset Bundles only allow resources to reference files inside the bundle's
+# own root — and the notebooks it deploys (bronze/, silver/, gold/) need to
+# stay at the root anyway, since that's what /de-init's brownfield
+# detector looks for. In Iteration 1 you'll replace this file's contents
+# with the real project bundle — same filename, different job.
 #
 # The one thing this does NOT create is the catalog itself — that needs
 # elevated permissions not every learner has, so it's provisioned once,

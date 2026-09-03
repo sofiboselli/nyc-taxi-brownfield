@@ -2,8 +2,8 @@
 #
 # - A schema + landing volume inside the pre-provisioned catalog — this
 #   part is fine, it's just plumbing for the exercise.
-# - A job wired to the three legacy notebooks (../../bronze, ../../silver,
-#   ../../gold — relative to this file), configured the way a rushed
+# - A job wired to the three legacy notebooks (../bronze, ../silver,
+#   ../gold — relative to this file), configured the way a rushed
 #   one-off actually gets deployed: one shared cluster with no
 #   autotermination, an old runtime, a fixed worker count instead of
 #   autoscale, no tags, no failure notifications, and no schedule (a real
@@ -35,19 +35,19 @@ resources:
       tasks:
         - task_key: ingest
           notebook_task:
-            notebook_path: ../../bronze/ingest_trips.py
+            notebook_path: ../bronze/ingest_trips.py
           job_cluster_key: shared
 
         - task_key: clean
           depends_on: [{ task_key: ingest }]
           notebook_task:
-            notebook_path: ../../silver/clean_trips.py
+            notebook_path: ../silver/clean_trips.py
           job_cluster_key: shared
 
         - task_key: kpi
           depends_on: [{ task_key: clean }]
           notebook_task:
-            notebook_path: ../../gold/kpi_by_borough_hour.py
+            notebook_path: ../gold/kpi_by_borough_hour.py
           job_cluster_key: shared
 
       job_clusters:

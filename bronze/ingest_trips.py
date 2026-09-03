@@ -6,8 +6,8 @@
 # MAGIC the team channel if you need context, nobody currently on the team
 # MAGIC wrote this.
 # MAGIC
-# MAGIC Run manually or via the "Taxi Analytics - Legacy" job — see `seed/`
-# MAGIC at the repo root for how that job gets deployed.
+# MAGIC Run manually or via the "Taxi Analytics - Legacy" job — see
+# MAGIC `SEED.md` at the repo root for how that job gets deployed.
 
 # COMMAND ----------
 

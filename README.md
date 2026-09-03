@@ -10,9 +10,11 @@ pipeline — and bring it up to Qubika standards one layer at a time.
   seed bundle, let `/de-init` detect the legacy layout and audit it, then
   three iterations (Bronze → Silver → Gold) that fix what the audit and
   `/de-assist review` surface.
-- **`seed/`** — a throwaway bundle that deploys the "already productive"
-  starting state for real: a schema, a landing volume, and the badly
-  configured "Taxi Analytics - Legacy" job. Run once, at the start.
+- **`databricks.yml` + `resources/legacy_infra.yml`** — a throwaway seed
+  bundle that deploys the "already productive" starting state for real: a
+  schema, a landing volume, and the badly configured "Taxi Analytics -
+  Legacy" job. Run once, at the start (see `SEED.md`) — Iteration 1
+  replaces this with the real project bundle.
 - **`bronze/`, `silver/`, `gold/`** — the *existing* pipeline, exactly as
   it was left: three flat notebooks, no bundle, no data-quality checks,
   hardcoded catalog naming. This is what gets audited and rebuilt, not a
