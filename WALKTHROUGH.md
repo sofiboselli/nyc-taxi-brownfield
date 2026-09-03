@@ -10,15 +10,20 @@ at a time, via VS Code.
 **Dataset:** NYC Yellow Taxi Trip Data
 
 **Catalog:** `dev_ai_kit_demo_brownfield` — the one Unity Catalog catalog
-provisioned for this exercise. Everything lives inside it: the legacy
-pipeline's tables, the rebuilt pipeline's tables, all of it. Layer
-separation happens through schemas within this one catalog.
+provisioned for this exercise, created ahead of time by whoever set this
+up (it needs elevated permissions most learners won't have). It's the
+only thing that isn't self-service — everything else, you build yourself,
+starting with the "already broken" state itself. Layer separation happens
+through schemas within this one catalog.
 
 **The scenario:** Six months ago a contractor built a working Bronze →
 Silver → Gold pipeline for a one-off executive demo, using flat
-`bronze/` / `silver/` / `gold/` notebooks and a job clicked together by
-hand in the Databricks UI. It still runs. Nobody who currently works here
-wrote it, and the person who owns the job has since left the company.
+`bronze/` / `silver/` / `gold/` notebooks and a job thrown together with
+no real project bundle behind it. It still runs. Nobody who currently
+works here wrote it. You'll deploy the exact same starting state yourself
+in Step 2, via `seed/` — a throwaway bundle whose only job is to
+materialize this mess for real, so it's something you can actually
+inspect and run, not just read about.
 
 **Why this repo doesn't pass Qubika standards — exactly:**
 
@@ -42,11 +47,12 @@ wrote it, and the person who owns the job has since left the company.
   with no snapshot/partition column, so there's no history — last month's
   numbers are gone the moment this month's run finishes. No table or
   column comments either.
-- **Deployment:** no `databricks.yml`, no bundle, no dev/staging/prod
-  targets. The whole thing was deployed by clicking through the Databricks
-  UI once and left alone (see `docs/existing-job-notes.md`).
-- **Governance:** the job is owned by one person's account, not a group —
-  and that person no longer works here. No tags, no failure-alert
+- **Deployment:** no project bundle, no dev/staging/prod targets — just a
+  job deployed once via `seed/` (see below) and left alone. `seed/` isn't
+  the project bundle either; it's disposable infrastructure that exists
+  only to stand this state up.
+- **Governance:** the job is owned by whoever deployed it — one
+  individual's account, not a group. No tags, no failure-alert
   notifications, no autotermination on the cluster.
 - **Testing:** none. Not one unit test anywhere in the repo.
 
@@ -74,18 +80,31 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 > that banner, the kit isn't wired up yet, and nothing else in this
 > walkthrough will work as described.
 
-### 2. Local Repository Setup (joining an existing project)
+### 2. Local Repository Setup — and standing up the mess you're about to join
 
-- 2.1 Clone the existing repo:
+- 2.1 Clone the repo:
   ```
   git clone https://github.com/sofiboselli/nyc-taxi-brownfield.git
   cd nyc-taxi-brownfield
   ```
 
-- 2.2 Read `docs/existing-job-notes.md` — what's actually deployed in the
-  workspace right now (a hand-built job, an owner who's left the company,
-  a cluster with no autotermination). None of this is visible from the
-  code alone.
+- 2.2 Deploy the seed bundle — this is what actually materializes the
+  "already productive" starting state in Databricks, real and reproducible
+  rather than something you're asked to take on faith:
+  ```
+  cd seed
+  databricks bundle deploy -t dev
+  ```
+- 2.3 Land the sample data into the volume the seed bundle just created
+  (commands in `seed/README.md`), then run the legacy job once:
+  ```
+  databricks bundle run legacy_taxi_job -t dev
+  cd ..
+  ```
+  At this point `dev_ai_kit_demo_brownfield.taxi_legacy` has real tables
+  in it, produced by a real (if badly configured) job — the same thing a
+  brownfield engineer would find on day one, except you now know exactly
+  how it was made, which `seed/README.md` documents in full.
 
 ### 3. Onboarding with Claude Code
 
@@ -212,9 +231,9 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   dev is the one that actually deploys here, since
   `dev_ai_kit_demo_brownfield` is the only catalog provisioned for this
   exercise; staging/prod stay structural placeholders), compute tagging,
-  the job re-owned by a **group** instead of `jsmith@qubika.com`,
-  failure-alert notifications configured, autotermination set on every
-  cluster.
+  the job re-owned by a **group** instead of whoever happened to run
+  `bundle deploy` in Step 2, failure-alert notifications configured,
+  autotermination set on every cluster.
 - 6.3 Run an end-to-end test, execute the same analytical SQL queries
   against the new Gold table, and re-run `/de-audit --sync` — compare its
   recommendations list against the Step 3 snapshot to see the gap close.

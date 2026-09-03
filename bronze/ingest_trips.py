@@ -6,12 +6,12 @@
 # MAGIC the team channel if you need context, nobody currently on the team
 # MAGIC wrote this.
 # MAGIC
-# MAGIC Run manually or via the "Taxi Analytics - Legacy" job (created in the
-# MAGIC UI, not in this repo — ask in #data-eng if you need access to edit it).
+# MAGIC Run manually or via the "Taxi Analytics - Legacy" job — see `seed/`
+# MAGIC at the repo root for how that job gets deployed.
 
 # COMMAND ----------
 
-landing_path = "/mnt/legacy-landing/taxi/"
+landing_path = "/Volumes/dev_ai_kit_demo_brownfield/taxi_legacy/landing/"
 
 trips = spark.read.parquet(landing_path + "yellow_tripdata_2024-01_sample.parquet")
 trips.write.mode("overwrite").saveAsTable("dev_ai_kit_demo_brownfield.taxi_legacy.bronze_trips")
