@@ -68,6 +68,17 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 
 [Placeholder: Add installation verification command output / screenshot]
 
+> **How the kit helps here:** nothing kit-specific happens yet — this is
+> the one-time setup that makes everything after it possible. Installing
+> the kit is what turns Claude Code from a generic coding agent into one
+> that has Qubika's 40+ skills, its `/de-*` slash commands, and its hooks
+> loaded. That last part is checkable, not a promise: every time Claude
+> Code starts inside a project, a `SessionStart` hook prints a banner —
+> kit version, whether it can see a bundle in the current folder, the
+> resolved catalog env, whether usage tracking is on. If you don't see
+> that banner, the kit isn't wired up yet, and nothing else in this
+> walkthrough will work as described.
+
 ### 2. Local Repository Setup (joining an existing project)
 
 - 2.1 Clone the existing repo:
@@ -83,6 +94,14 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   workspace right now (a hand-built job, an owner who's left the company,
   a cluster with no autotermination). None of this is visible from the
   code alone.
+
+> **How the kit helps here:** also not yet — `git clone` is just git, and
+> reading a markdown file is just reading. Worth naming honestly: this is
+> the one part of the whole walkthrough where you're doing plain manual
+> legwork, because the kit's automated audit (next step) can only see the
+> *repo*, not what's live in the workspace. `docs/existing-job-notes.md`
+> exists specifically to cover that blind spot until you have real
+> workspace access wired up.
 
 ### 3. Onboarding with Claude Code
 
@@ -102,6 +121,22 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   match the gaps this walkthrough calls out below — if the kit's audit and
   your own read of the code disagree, that's worth a note for whoever owns
   the audit tooling.
+
+> **How the kit helps here:** this is the first unambiguous, checkable
+> kit moment, and it's worth slowing down to actually verify it rather
+> than take it on faith. `/de-init`'s detection isn't an LLM guess — it's
+> a small deterministic script (`scripts/init/detect.py`) that checks for
+> five concrete signals, one of which is exactly "do `bronze/`, `silver/`,
+> or `gold/` exist with content in them" — the legacy layout this repo
+> was deliberately built with. That's what routes `/de-init` to its
+> brownfield branch instead of scaffolding a fresh project on top of your
+> existing code. From there it wraps `/de-audit`, which does something a
+> person skimming the repo for ten minutes wouldn't: it inventories the
+> repo *and* the live workspace, then ranks what it finds by severity
+> (CRITICAL / HIGH / MEDIUM / LOW) instead of handing you an unordered
+> wall of observations. That ranked list is `docs/first-steps.md` —
+> compare it against the "why this repo doesn't pass" list at the top of
+> this doc and see how much it independently reconstructs.
 
 ### 4. Iteration 1: The Bronze Layer — From Notebook to Bundle
 
@@ -130,6 +165,23 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 
 [Placeholder: Add screenshots of Databricks Catalog and job execution]
 
+> **How the kit helps here:** the Auto Loader code Claude Code writes for
+> `src/ingest/main.py` isn't invented fresh — it comes from a specific,
+> named pattern in `qubika-streaming-pipelines` (the `cloudFiles` format,
+> `schemaLocation`, `mergeSchema=true`), and the `_ingested_at` /
+> `_source_file` metadata-column convention comes from
+> `qubika-medallion-architecture`. The bundle shape itself
+> (`databricks.yml` + `resources/` + `src/`) comes from
+> `qubika-databricks-bundles`. Concretely: without the kit, "add Bronze
+> metadata columns" is a convention someone has to remember and enforce by
+> hand across every project; with it, Claude pulls the same pattern every
+> time because it's reading it from the same skill file. Also watch for
+> this: the kit's own scaffolding refuses to silently create catalog or
+> schema objects — it's supposed to ask you to confirm the exact name
+> before creating anything in Unity Catalog. If Claude just goes ahead and
+> creates `raw_main` without asking, that's the guardrail *not* firing,
+> worth flagging.
+
 ### 5. Iteration 2: The Silver Layer — Adding the Quality Gate That Was Never There
 
 - 5.1 Now that Bronze is on the bundle, prompt Claude Code (`/de-pipeline`
@@ -153,6 +205,22 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 
 [Placeholder: Add screenshot of the new Silver table, the quarantine table that now exists, and a before/after row count showing what quality actually caught]
 
+> **How the kit helps here:** the DQX rules Claude Code writes come from
+> `qubika-data-quality` — `DQRowRule`/`DQDatasetRule`, `criticality`
+> (`error` drops/quarantines a row, `warn` flags it without losing it),
+> and the incremental `MERGE` + build-order-gate pattern comes from
+> `qubika-medallion-architecture`. Worth being honest about a real limit
+> here too: the skill's own written examples use an API
+> (`check_function="is_not_null"`) that doesn't actually match the
+> installed `databricks-labs-dqx` package (the real API is
+> `check_func=is_not_null`, a function reference, not a string) — a
+> genuine bug in the skill's docs. The kit still gets you further than
+> starting from nothing: it points you at the right framework, the right
+> concepts (row-level vs dataset-level checks, error vs warn), and the
+> right place to look. It doesn't mean every line it generates is
+> guaranteed correct without you checking it runs. That's a real,
+> demonstrable moment worth showing live, not glossing over.
+
 ### 6. Iteration 3: Gold Layer & Closing the Governance Gaps
 
 - 6.1 Prompt Claude Code to rebuild `gold/kpi_by_borough_hour.py` on top
@@ -173,6 +241,22 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   recommendations list against the Step 3 snapshot to see the gap close.
 
 [Placeholder: Add before/after /de-audit recommendation counts, final pipeline DAG screenshot, and SQL query results]
+
+> **How the kit helps here:** the Gold aggregation shape (grouped
+> aggregation + `snapshot_date` partition) comes from
+> `qubika-medallion-architecture`'s Gold pattern. The governance cleanup
+> in 6.2 draws on several skills at once, each covering one gap: compute
+> tagging comes from `qubika-compute-tagging`; the "job owner must be a
+> group, never an individual" rule is baked directly into the kit's own
+> bundle scaffolding template (it's the exact convention `/de-init` writes
+> into a fresh `databricks.yml` on Greenfield too — the fix here is
+> applying a rule the kit already enforces by default on new projects);
+> failure alerting comes from `qubika-monitoring-observability`. The
+> closing move — `/de-audit --sync` — is the clearest "kit vs. no kit"
+> comparison in the whole walkthrough: without it, "prove this got
+> better" means someone's subjective read of the code; with it, you have
+> the same tool, run twice, producing a ranked list that's measurably
+> shorter.
 
 ---
 
