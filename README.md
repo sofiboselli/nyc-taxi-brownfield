@@ -34,16 +34,8 @@ You'll need:
   client) — if `/de-init` isn't a recognized command, it isn't installed yet.
 - A Databricks CLI profile for the `qubika-training` workspace. Run
   `/de-databricks-setup` if you don't have one yet.
-- On the `dev_ai_kit_demo_brownfield` catalog specifically — everyone
-  doing this exercise shares it — you need `USE CATALOG`, `CREATE SCHEMA`,
-  and `CREATE VOLUME`. The seed bundle deploy fails immediately without
-  them (`cannot create schema: User does not have CREATE SCHEMA and USE
-  CATALOG on Catalog...`). If you don't have these, ask whoever set up
-  this exercise to run:
-  ```sql
-  GRANT USE CATALOG, CREATE SCHEMA, CREATE VOLUME
-  ON CATALOG dev_ai_kit_demo_brownfield TO `<your-user-or-group>`;
-  ```
+- On the `dev_ai_kit_demo_brownfield` catalog ask for `USE CATALOG`, `CREATE SCHEMA`,
+  and `CREATE VOLUME`. 
 
 That's it — everything else, including the "already broken" pipeline
 itself, you deploy yourself in `WALKTHROUGH.md` Step 2.

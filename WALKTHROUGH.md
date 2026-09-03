@@ -84,8 +84,7 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 
 ### 2. Local Repository Setup — and standing up the mess you're about to join
 
-- 2.1 Clone the repo and launch Claude Code from the root — one session,
-  used for the rest of this walkthrough:
+- 2.1 Clone the repo and launch Claude Code from the root:
   ```
   git clone https://github.com/sofiboselli/nyc-taxi-brownfield.git
   cd nyc-taxi-brownfield
