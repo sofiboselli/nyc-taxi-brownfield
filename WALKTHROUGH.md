@@ -64,11 +64,10 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 - 1.1 Read the "Kit Introduction" doc (quick context on what the kit is).
 - 1.2 Follow the "Download & Install the Kit" guide.
 
-> **How the kit helps here:** nothing kit-specific happens yet — this is
-> the one-time setup that makes everything after it possible. Installing
+> Installing
 > the kit is what turns Claude Code from a generic coding agent into one
 > that has Qubika's 40+ skills, its `/de-*` slash commands, and its hooks
-> loaded. That last part is checkable, not a promise: every time Claude
+> loaded. Every time Claude
 > Code starts inside a project, a `SessionStart` hook prints a banner —
 > kit version, whether it can see a bundle in the current folder, the
 > resolved catalog env, whether usage tracking is on. If you don't see
@@ -88,14 +87,6 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   a cluster with no autotermination). None of this is visible from the
   code alone.
 
-> **How the kit helps here:** also not yet — `git clone` is just git, and
-> reading a markdown file is just reading. Worth naming honestly: this is
-> the one part of the whole walkthrough where you're doing plain manual
-> legwork, because the kit's automated audit (next step) can only see the
-> *repo*, not what's live in the workspace. `docs/existing-job-notes.md`
-> exists specifically to cover that blind spot until you have real
-> workspace access wired up.
-
 ### 3. Onboarding with Claude Code
 
 - 3.1 Launch Claude Code in VS Code, inside the cloned repo.
@@ -107,14 +98,14 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   `docs/project-profile.md` (full inventory) and `docs/first-steps.md`
   (a prioritized punch list).
 
-- 3.3 Read the top 3 priorities `/de-init` surfaces. Confirm they roughly
-  match the gaps this walkthrough calls out below — if the kit's audit and
-  your own read of the code disagree, that's worth a note for whoever owns
-  the audit tooling.
+- 3.3 Read the top priorities `/de-init` surfaces. `/de-audit`'s scope is
+  governance and drift — ownership gaps, missing `databricks.yml`/`CLAUDE.md`,
+  stale jobs, comment coverage — so expect it to catch the departed-owner
+  problem and the missing bundle, not the Bronze/Silver/Gold code issues.
+  It doesn't check data-quality posture or code-level conventions yet
+  (that's documented in its own command reference, not a guess).
 
-> **How the kit helps here:** this is the first unambiguous, checkable
-> kit moment, and it's worth slowing down to actually verify it rather
-> than take it on faith. `/de-init`'s detection isn't an LLM guess — it's
+> `/de-init` is
 > a small deterministic script (`scripts/init/detect.py`) that checks for
 > five concrete signals, one of which is exactly "do `bronze/`, `silver/`,
 > or `gold/` exist with content in them" — the legacy layout this repo
@@ -124,21 +115,35 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 > person skimming the repo for ten minutes wouldn't: it inventories the
 > repo *and* the live workspace, then ranks what it finds by severity
 > (CRITICAL / HIGH / MEDIUM / LOW) instead of handing you an unordered
-> wall of observations. That ranked list is `docs/first-steps.md` —
-> compare it against the "why this repo doesn't pass" list at the top of
-> this doc and see how much it independently reconstructs.
+> wall of observations. That ranked list is `docs/first-steps.md`.
+
+- 3.4 Run `/de-assist review` — a separate check, specifically for
+  pipeline code compliance: full catalog paths, Silver `MERGE` vs.
+  `overwrite`, Bronze `_ingested_at`/`_source_file` columns, Delta
+  constraints, tests, monitoring/alerting. This is the tool that actually
+  surfaces the Bronze/Silver/Gold gaps `/de-audit` doesn't check — it
+  reports violations with file and line number, and offers to fix them.
+  Iterations 1–3 below respond to what this turns up, not to a
+  pre-decided plan.
+
+> Worth being precise about which tool does what, since it's easy to
+> assume one all-knowing "the kit" scans everything: `/de-audit` and
+> `/de-assist review` check different things, and the union of the two is
+> what covers the full "why this repo doesn't pass" list at the top of
+> this doc. Neither one alone does.
 
 ### 4. Iteration 1: The Bronze Layer — From Notebook to Bundle
 
-- 4.1 Ask Claude Code to turn `bronze/ingest_trips.py` into a proper
-  Bronze ingestion step inside a Databricks Asset Bundle: `databricks.yml`
-  + `resources/` + `src/ingest/`, Auto Loader instead of a one-shot batch
-  read, `_ingested_at` / `_source_file` metadata columns added. The
-  catalog stays `dev_ai_kit_demo_brownfield` (pulled into a `${var.catalog}`
-  bundle variable instead of hardcoded), but the target schema becomes
-  `raw_main` — separate from the legacy pipeline's `taxi_legacy` schema —
-  so the new tables (`raw_main.yellow_trips`, `raw_main.taxi_zone_lookup`)
-  land alongside the old ones without colliding.
+- 4.1 Take what `/de-assist review` reported for `bronze/ingest_trips.py`
+  — plain batch read instead of Auto Loader, no `_ingested_at` /
+  `_source_file`, catalog hardcoded — and ask Claude Code to fix it inside
+  a proper Databricks Asset Bundle: `databricks.yml` + `resources/` +
+  `src/ingest/`. The catalog stays `dev_ai_kit_demo_brownfield` (pulled
+  into a `${var.catalog}` bundle variable instead of hardcoded), but the
+  target schema becomes `raw_main` — separate from the legacy pipeline's
+  `taxi_legacy` schema — so the new tables (`raw_main.yellow_trips`,
+  `raw_main.taxi_zone_lookup`) land alongside the old ones without
+  colliding.
 
 - 4.2 Ask Claude Code to deploy this first bundle version to the Databricks
   sandbox (Bronze only — Silver/Gold still point at the old tables for now).
@@ -149,7 +154,7 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   `dev_ai_kit_demo_brownfield.taxi_legacy.bronze_trips` /
   `bronze_zones` tables — they should match.
 
-> **How the kit helps here:** the Auto Loader code Claude Code writes for
+> The Auto Loader code Claude Code writes for
 > `src/ingest/main.py` isn't invented fresh — it comes from a specific,
 > named pattern in `qubika-streaming-pipelines` (the `cloudFiles` format,
 > `schemaLocation`, `mergeSchema=true`), and the `_ingested_at` /
@@ -162,21 +167,21 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 > time because it's reading it from the same skill file. Also watch for
 > this: the kit's own scaffolding refuses to silently create catalog or
 > schema objects — it's supposed to ask you to confirm the exact name
-> before creating anything in Unity Catalog. If Claude just goes ahead and
-> creates `raw_main` without asking, that's the guardrail *not* firing,
-> worth flagging.
+> before creating anything in Unity Catalog.
 
 ### 5. Iteration 2: The Silver Layer — Adding the Quality Gate That Was Never There
 
-- 5.1 Now that Bronze is on the bundle, prompt Claude Code (`/de-pipeline`
-  or directly) to rebuild `silver/clean_trips.py` as a proper Silver step,
-  writing to `dev_ai_kit_demo_brownfield.curated_main.trips`: incremental
-  `MERGE` instead of the legacy `overwrite`, and — the actual gap here —
-  **DQX checks that simply never existed.** The legacy notebook cleans
-  nothing; every negative fare, every null, every out-of-range timestamp
-  in the source data has been flowing straight into `taxi_legacy.silver_trips`
-  untouched since day one. Rejected rows should land in a new
-  `quarantine_main.trips` table, not disappear.
+- 5.1 Now that Bronze is on the bundle, re-run `/de-assist review` (or
+  read what it already flagged for `silver/clean_trips.py`): `overwrite`
+  instead of `MERGE`, no Delta constraints — and prompt Claude Code
+  (`/de-pipeline` or directly) to rebuild it as a proper Silver step,
+  writing to `dev_ai_kit_demo_brownfield.curated_main.trips`. The review
+  checklist doesn't have a line item for "no DQX," but it's the same
+  category of gap and the bigger one in practice: the legacy notebook
+  cleans nothing. Every negative fare, every null, every out-of-range
+  timestamp in the source data has been flowing straight into
+  `taxi_legacy.silver_trips` untouched since day one. Rejected rows
+  should land in a new `quarantine_main.trips` table, not disappear.
 
 - 5.2 Highlight the Kit in action: Qubika guardrails/hooks asking for
   confirmation before touching anything in a prod-like catalog, naming
@@ -185,26 +190,20 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 
 - 5.3 Deploy the update and re-run in Databricks.
 
-> **How the kit helps here:** the DQX rules Claude Code writes come from
+> The DQX rules Claude Code writes come from
 > `qubika-data-quality` — `DQRowRule`/`DQDatasetRule`, `criticality`
 > (`error` drops/quarantines a row, `warn` flags it without losing it),
 > and the incremental `MERGE` + build-order-gate pattern comes from
-> `qubika-medallion-architecture`. Worth being honest about a real limit
-> here too: the skill's own written examples use an API
-> (`check_function="is_not_null"`) that doesn't actually match the
-> installed `databricks-labs-dqx` package (the real API is
-> `check_func=is_not_null`, a function reference, not a string) — a
-> genuine bug in the skill's docs. The kit still gets you further than
-> starting from nothing: it points you at the right framework, the right
+> `qubika-medallion-architecture`. The kit points you at the right framework, the right
 > concepts (row-level vs dataset-level checks, error vs warn), and the
 > right place to look. It doesn't mean every line it generates is
-> guaranteed correct without you checking it runs. That's a real,
-> demonstrable moment worth showing live, not glossing over.
+> guaranteed correct without you checking it runs.
 
 ### 6. Iteration 3: Gold Layer & Closing the Governance Gaps
 
-- 6.1 Prompt Claude Code to rebuild `gold/kpi_by_borough_hour.py` on top
-  of the new Silver table, writing to
+- 6.1 Same pattern once more: check what `/de-assist review` says about
+  `gold/kpi_by_borough_hour.py`, then prompt Claude Code to rebuild it on
+  top of the new Silver table, writing to
   `dev_ai_kit_demo_brownfield.analytics_main.kpi_borough_hour` — same KPI
   shape, now with table/column comments and a snapshot-date partition so
   history isn't lost on every `CREATE OR REPLACE`.
@@ -220,7 +219,7 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   against the new Gold table, and re-run `/de-audit --sync` — compare its
   recommendations list against the Step 3 snapshot to see the gap close.
 
-> **How the kit helps here:** the Gold aggregation shape (grouped
+> The Gold aggregation shape (grouped
 > aggregation + `snapshot_date` partition) comes from
 > `qubika-medallion-architecture`'s Gold pattern. The governance cleanup
 > in 6.2 draws on several skills at once, each covering one gap: compute

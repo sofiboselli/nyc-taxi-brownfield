@@ -6,19 +6,31 @@ against you. It's here so you have something concrete to compare your own
 work against. If something's unchecked, that's a fine place to stop and
 ask Claude "how should I fix this?" rather than something to feel bad about.
 
-## Step 1 — run the kit's own audit
+## Step 1 — run the kit's own automated checks
+
+Two different commands, two different scopes — run both:
 
 ```
 /de-audit --catalogs dev_ai_kit_demo_brownfield
 ```
 
-This is the kit's real, automated check — it scans your repo *and* your
-live workspace and writes `docs/project-profile.md` with a ranked
-`recommendations:` list (governance gaps, ownership, stale jobs, missing
-`databricks.yml`/`CLAUDE.md`, etc). Read the top few recommendations before
-moving on to the manual list below — it doesn't check data-quality posture
-or code-level conventions yet, which is what the rest of this checklist is
-for.
+Scans your repo *and* your live workspace, writes
+`docs/project-profile.md` with a ranked `recommendations:` list —
+governance gaps, ownership, stale jobs, missing `databricks.yml`/`CLAUDE.md`.
+It doesn't check pipeline code itself.
+
+```
+/de-assist review
+```
+
+Reviews the pipeline code on your current branch for Qubika compliance —
+catalog paths, `MERGE` vs. `overwrite`, Bronze metadata columns, Delta
+constraints, tests, monitoring — and reports violations with file and line
+number.
+
+Between the two, most of what's checkable automatically gets checked.
+What's left — DQX coverage and criticality choices, schema separation,
+whether comments are actually informative — is Step 2.
 
 ## Step 2 — manual checklist
 
