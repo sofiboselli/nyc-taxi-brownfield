@@ -12,8 +12,7 @@ at a time, via VS Code.
 **Catalog:** `dev_ai_kit_demo_brownfield` — the one Unity Catalog catalog
 provisioned for this exercise. Everything lives inside it: the legacy
 pipeline's tables, the rebuilt pipeline's tables, all of it. Layer
-separation happens through schemas within this one catalog, not through
-separate catalogs.
+separation happens through schemas within this one catalog.
 
 **The scenario:** Six months ago a contractor built a working Bronze →
 Silver → Gold pipeline for a one-off executive demo, using flat
@@ -52,7 +51,7 @@ wrote it, and the person who owns the job has since left the company.
 - **Testing:** none. Not one unit test anywhere in the repo.
 
 The pipeline isn't *broken* — the numbers it produces are directionally
-fine, it just doesn't meet the standards we want to enforce at Qubika to ensure the secuirty, organizations and data quality we promise to our clients. 
+fine, it just doesn't meet the standards we want to enforce at Qubika to ensure the secuirty, organization and data quality we promise to our clients. 
 
 **Approach:** Audit → Fix → Deploy → Validate in Databricks → Repeat.
 
@@ -64,8 +63,6 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 
 - 1.1 Read the "Kit Introduction" doc (quick context on what the kit is).
 - 1.2 Follow the "Download & Install the Kit" guide.
-
-[Placeholder: Add installation verification command output / screenshot]
 
 > **How the kit helps here:** nothing kit-specific happens yet — this is
 > the one-time setup that makes everything after it possible. Installing
@@ -85,9 +82,6 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   git clone https://github.com/sofiboselli/nyc-taxi-brownfield.git
   cd nyc-taxi-brownfield
   ```
-
-[Placeholder: Add terminal code block with exact commands]
-[Placeholder: Add screenshot of the existing (messy, flat bronze/silver/gold) VS Code workspace]
 
 - 2.2 Read `docs/existing-job-notes.md` — what's actually deployed in the
   workspace right now (a hand-built job, an owner who's left the company,
@@ -112,9 +106,6 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   of scaffolding a fresh project on top. It wraps `/de-audit` and writes
   `docs/project-profile.md` (full inventory) and `docs/first-steps.md`
   (a prioritized punch list).
-
-[Placeholder: Add the detection output / AskUserQuestion confirmation shown by /de-init]
-[Placeholder: Add screenshot of the generated docs/project-profile.md and docs/first-steps.md]
 
 - 3.3 Read the top 3 priorities `/de-init` surfaces. Confirm they roughly
   match the gaps this walkthrough calls out below — if the kit's audit and
@@ -149,20 +140,14 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   so the new tables (`raw_main.yellow_trips`, `raw_main.taxi_zone_lookup`)
   land alongside the old ones without colliding.
 
-[Placeholder: Add before/after diff of the Bronze code]
-
 - 4.2 Ask Claude Code to deploy this first bundle version to the Databricks
   sandbox (Bronze only — Silver/Gold still point at the old tables for now).
-
-[Placeholder: Add terminal output log for the deployment]
 
 - 4.3 **Validation in Databricks:** run the job, confirm the new
   `dev_ai_kit_demo_brownfield.raw_main` tables land correctly in Unity
   Catalog, and compare row counts against the legacy
   `dev_ai_kit_demo_brownfield.taxi_legacy.bronze_trips` /
   `bronze_zones` tables — they should match.
-
-[Placeholder: Add screenshots of Databricks Catalog and job execution]
 
 > **How the kit helps here:** the Auto Loader code Claude Code writes for
 > `src/ingest/main.py` isn't invented fresh — it comes from a specific,
@@ -198,11 +183,7 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   convention nudges, the DQX pattern reference — this is the moment to
   show the kit steering the work, not just generating code.
 
-[Placeholder: Add screenshot/log showing a Kit guardrail or hook triggering]
-
 - 5.3 Deploy the update and re-run in Databricks.
-
-[Placeholder: Add screenshot of the new Silver table, the quarantine table that now exists, and a before/after row count showing what quality actually caught]
 
 > **How the kit helps here:** the DQX rules Claude Code writes come from
 > `qubika-data-quality` — `DQRowRule`/`DQDatasetRule`, `criticality`
@@ -238,8 +219,6 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 - 6.3 Run an end-to-end test, execute the same analytical SQL queries
   against the new Gold table, and re-run `/de-audit --sync` — compare its
   recommendations list against the Step 3 snapshot to see the gap close.
-
-[Placeholder: Add before/after /de-audit recommendation counts, final pipeline DAG screenshot, and SQL query results]
 
 > **How the kit helps here:** the Gold aggregation shape (grouped
 > aggregation + `snapshot_date` partition) comes from
