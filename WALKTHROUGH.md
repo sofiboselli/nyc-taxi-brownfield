@@ -119,7 +119,7 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 
 - 3.3 Read the top priorities `/de-init` surfaces. `/de-audit`'s scope is
   governance and drift — ownership gaps, missing `databricks.yml`/`CLAUDE.md`,
-  stale jobs, comment coverage — so expect it to catch the departed-owner
+  stale jobs, comment coverage — so expect it to catch the individual-owner
   problem and the missing bundle, not the Bronze/Silver/Gold code issues.
   It doesn't check data-quality posture or code-level conventions yet
   (that's documented in its own command reference, not a guess).
