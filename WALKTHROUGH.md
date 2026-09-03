@@ -14,12 +14,39 @@ at a time, via VS Code.
 Silver → Gold pipeline for a one-off executive demo, using flat
 `bronze/` / `silver/` / `gold/` notebooks and a job clicked together by
 hand in the Databricks UI. It still runs. Nobody who currently works here
-wrote it, and the person who owns the job has since left the company. The
-numbers it produces are directionally fine — this is **not** a
-"find the planted bug" exercise. It's a "this technically works, but
-none of it would pass review today" exercise: no bundle, no naming
-convention, no data-quality gate, no tests, no tagging, no alerting, and
-a job owned by someone who can no longer log in.
+wrote it, and the person who owns the job has since left the company.
+
+**Why this repo doesn't pass Qubika standards — exactly:**
+
+- **Naming & catalog:** everything lives in one hardcoded catalog/schema
+  (`nyc_taxi_analytics.taxi`), not the `qubika_{env}_{code}` convention —
+  and Bronze/Silver/Gold are distinguished only by a table-name prefix
+  (`bronze_`, `silver_`, `gold_`), not separate schemas.
+- **Bronze:** `bronze/ingest_trips.py` is a one-shot batch
+  `spark.read.parquet()` off a hardcoded DBFS mount path
+  (`/mnt/legacy-landing/taxi/`), not Auto Loader. No `_ingested_at` /
+  `_source_file` metadata columns, and no way to land two months of data
+  side by side without renaming the table.
+- **Silver:** `silver/clean_trips.py` has zero data-quality enforcement.
+  No DQX, no Delta constraints, no quarantine table. Every negative fare,
+  null, and garbage timestamp already in `sample_data/` has been flowing
+  straight through into Gold since day one. It's also a full `overwrite`
+  every run, not an incremental `MERGE`.
+- **Gold:** `gold/kpi_by_borough_hour.py` is `CREATE OR REPLACE TABLE`
+  with no snapshot/partition column, so there's no history — last month's
+  numbers are gone the moment this month's run finishes. No table or
+  column comments either.
+- **Deployment:** no `databricks.yml`, no bundle, no dev/staging/prod
+  targets. The whole thing was deployed by clicking through the Databricks
+  UI once and left alone (see `docs/existing-job-notes.md`).
+- **Governance:** the job is owned by one person's account, not a group —
+  and that person no longer works here. No tags, no failure-alert
+  notifications, no autotermination on the cluster.
+- **Testing:** none. Not one unit test anywhere in the repo.
+
+The pipeline isn't *broken* — the numbers it produces are directionally
+fine. Every item above maps directly to a line in `docs/final-checklist.md`;
+fixing them, layer by layer, is the exercise.
 
 **Approach:** Audit → Fix → Deploy → Validate in Databricks → Repeat.
 
