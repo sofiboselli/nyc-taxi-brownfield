@@ -88,14 +88,13 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   cd nyc-taxi-brownfield
   ```
 
-- 2.2 `cd` into `seed/` **first** — `/de-databricks-setup` only looks for
-  `databricks.yml` in the current directory, not subdirectories, and
-  `seed/` is where the one with the real host lives. Running the command
-  from the repo root instead will silently drop you into its "no
-  `databricks.yml` found" fallback flow, which still works but skips the
-  host it would otherwise read automatically:
+- 2.2 `cd` into `seed/` and **start Claude Code from there** — not just a
+  `cd` inside an already-running session. Slash commands like
+  `/de-databricks-setup` look for `databricks.yml` in the directory Claude
+  Code was launched in, not wherever you `cd` to afterward:
   ```
   cd seed
+  claude
   ```
 - 2.3 Authenticate the Databricks CLI against `qubika-training` — run
   `/de-databricks-setup`, the kit's own setup command, and follow the
@@ -111,12 +110,18 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   (commands in `seed/README.md`), then run the legacy job once:
   ```
   databricks bundle run legacy_taxi_job -t dev
-  cd ..
   ```
   At this point `dev_ai_kit_demo_brownfield.taxi_legacy` has real tables
   in it, produced by a real (if badly configured) job — the same thing a
   brownfield engineer would find on day one, except you now know exactly
   how it was made, which `seed/README.md` documents in full.
+
+- 2.6 Exit this Claude Code session and go back to the repo root — Step 3
+  starts a fresh one, scoped to the root, for the same reason as 2.2:
+  ```
+  exit
+  cd ..
+  ```
 
 ### 3. Onboarding with Claude Code
 
