@@ -88,11 +88,19 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   cd nyc-taxi-brownfield
   ```
 
-- 2.2 Authenticate the Databricks CLI against `qubika-training`. From
-  inside `seed/` (where `databricks.yml` lives, host already filled in),
-  run `/de-databricks-setup` in Claude Code and follow the prompts — it
-  writes a profile to `~/.databrickscfg` and validates it for you. If you
-  already have a working profile for this workspace, skip this.
+- 2.2 `cd` into `seed/` **first** — `/de-databricks-setup` only looks for
+  `databricks.yml` in the current directory, not subdirectories, and
+  `seed/` is where the one with the real host lives. Running the command
+  from the repo root instead will silently drop you into its "no
+  `databricks.yml` found" fallback flow, which still works but skips the
+  host it would otherwise read automatically:
+  ```
+  cd seed
+  ```
+- 2.3 Authenticate the Databricks CLI against `qubika-training`: run
+  `/de-databricks-setup` in Claude Code and follow the prompts — it writes
+  a profile to `~/.databrickscfg` and validates it for you. If you already
+  have a working profile for this workspace, skip this.
   `/de-databricks-setup` is the kit command; if it asks you to paste a
   personal access token and you'd rather that not sit in the chat
   transcript, it offers a plain-CLI alternative — run
@@ -101,12 +109,11 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   something the kit provides — the kit's own setup flow just points you
   at it.
 
-- 2.3 Deploy the seed bundle
+- 2.4 Deploy the seed bundle (still inside `seed/`):
   ```
-  cd seed
   databricks bundle deploy -t dev
   ```
-- 2.4 Land the sample data into the volume the seed bundle just created
+- 2.5 Land the sample data into the volume the seed bundle just created
   (commands in `seed/README.md`), then run the legacy job once:
   ```
   databricks bundle run legacy_taxi_job -t dev
