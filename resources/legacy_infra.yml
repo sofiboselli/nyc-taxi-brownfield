@@ -23,11 +23,13 @@ resources:
   volumes:
     landing:
       catalog_name: ${var.catalog}
-      schema_name: taxi_legacy
+      # Referencing the schema resource (not the literal string "taxi_legacy")
+      # is what makes Terraform create the schema before the volume --
+      # `volumes` has no `depends_on` field, this is the supported way to
+      # express the same ordering.
+      schema_name: ${resources.schemas.taxi_legacy.name}
       name: landing
       volume_type: MANAGED
-      depends_on:
-        - taxi_legacy
 
   jobs:
     legacy_taxi_job:
