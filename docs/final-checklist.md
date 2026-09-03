@@ -1,7 +1,9 @@
 # Final checklist: does this match Qubika's AI Dev Kit standards?
 
-Run through this once you've got something working. It's a learning tool,
-not a grade — if something's unchecked, that's a fine place to stop and
+For you, the person doing this exercise, to run through once you've got
+something working — not a grade, no passing score, nobody's reviewing this
+against you. It's here so you have something concrete to compare your own
+work against. If something's unchecked, that's a fine place to stop and
 ask Claude "how should I fix this?" rather than something to feel bad about.
 
 ## Step 1 — run the kit's own audit
