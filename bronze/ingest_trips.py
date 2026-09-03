@@ -1,0 +1,36 @@
+# Databricks notebook source
+# MAGIC %md
+# MAGIC ## Taxi ingest
+# MAGIC Loads the monthly trip export + zone lookup someone drops into the
+# MAGIC landing folder. Built by a contractor for a one-off exec demo — see
+# MAGIC the team channel if you need context, nobody currently on the team
+# MAGIC wrote this.
+# MAGIC
+# MAGIC Run manually or via the "Taxi Analytics - Legacy" job (created in the
+# MAGIC UI, not in this repo — ask in #data-eng if you need access to edit it).
+
+# COMMAND ----------
+
+landing_path = "/mnt/legacy-landing/taxi/"
+
+trips = spark.read.parquet(landing_path + "yellow_tripdata_2024-01_sample.parquet")
+trips.write.mode("overwrite").saveAsTable("nyc_taxi_analytics.taxi.bronze_trips")
+
+zones = (
+    spark.read.option("header", "true")
+    .option("inferSchema", "true")
+    .csv(landing_path + "taxi_zone_lookup.csv")
+)
+zones.write.mode("overwrite").saveAsTable("nyc_taxi_analytics.taxi.bronze_zones")
+
+print(f"bronze_trips: {trips.count()} rows")
+print(f"bronze_zones: {zones.count()} rows")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC That's it — whoever set this up just re-runs this notebook (or the
+# MAGIC scheduled job) whenever a new month's file shows up in the landing
+# MAGIC folder. `mode("overwrite")` on the whole table, so re-running with the
+# MAGIC same file is harmless, but there's no way to land two months side by
+# MAGIC side without renaming the table.
