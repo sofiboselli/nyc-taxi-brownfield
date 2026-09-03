@@ -88,10 +88,7 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   cd nyc-taxi-brownfield
   ```
 
-- 2.2 `cd` into `seed/` and **start Claude Code from there** — not just a
-  `cd` inside an already-running session. Slash commands like
-  `/de-databricks-setup` look for `databricks.yml` in the directory Claude
-  Code was launched in, not wherever you `cd` to afterward:
+- 2.2 `cd` into `seed/` and start Claude Code from there
   ```
   cd seed
   claude
@@ -102,8 +99,12 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   you. If you already have a working profile for this workspace, skip
   this.
 
-- 2.4 Deploy the seed bundle (still inside `seed/`):
+- 2.4 Open a new terminal tab/window — the rest of Step 2 is plain
+  Databricks CLI, no Claude Code needed, so there's no reason to fight
+  with running raw shell commands inside an interactive session. `cd`
+  into `seed/` there too, then deploy the bundle:
   ```
+  cd nyc-taxi-brownfield/seed
   databricks bundle deploy -t dev
   ```
 - 2.5 Land the sample data into the volume the seed bundle just created
@@ -116,10 +117,10 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   brownfield engineer would find on day one, except you now know exactly
   how it was made, which `seed/README.md` documents in full.
 
-- 2.6 Exit this Claude Code session and go back to the repo root — Step 3
-  starts a fresh one, scoped to the root, for the same reason as 2.2:
+- 2.6 In that same terminal, go back to the repo root — Step 3 starts a
+  fresh Claude Code session there, scoped to the root, for the same
+  reason as 2.2:
   ```
-  exit
   cd ..
   ```
 
