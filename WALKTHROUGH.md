@@ -88,14 +88,18 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   cd nyc-taxi-brownfield
   ```
 
-- 2.2 Deploy the seed bundle — this is what actually materializes the
-  "already productive" starting state in Databricks, real and reproducible
-  rather than something you're asked to take on faith:
+- 2.2 Authenticate the Databricks CLI against `qubika-training`. From
+  inside `seed/` (where `databricks.yml` lives, host already filled in),
+  run `/de-databricks-setup` in Claude Code and follow the prompts — it
+  writes a profile to `~/.databrickscfg` and validates it for you. If you
+  already have a working profile for this workspace, skip this.
+
+- 2.3 Deploy the seed bundle
   ```
   cd seed
   databricks bundle deploy -t dev
   ```
-- 2.3 Land the sample data into the volume the seed bundle just created
+- 2.4 Land the sample data into the volume the seed bundle just created
   (commands in `seed/README.md`), then run the legacy job once:
   ```
   databricks bundle run legacy_taxi_job -t dev
