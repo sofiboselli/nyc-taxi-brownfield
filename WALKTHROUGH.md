@@ -7,8 +7,7 @@ joining an *existing*, already-productive Databricks project — auditing
 what's there, then bringing it up to Qubika AI Dev Kit standards one layer
 at a time, via VS Code.
 
-**Dataset:** NYC Yellow Taxi Trip Data (same as Greenfield — this repo's
-`sample_data/`).
+**Dataset:** NYC Yellow Taxi Trip Data
 
 **Catalog:** `dev_ai_kit_demo_brownfield` — the one Unity Catalog catalog
 provisioned for this exercise. Everything lives inside it: the legacy
@@ -248,10 +247,10 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 > in 6.2 draws on several skills at once, each covering one gap: compute
 > tagging comes from `qubika-compute-tagging`; the "job owner must be a
 > group, never an individual" rule is baked directly into the kit's own
-> bundle scaffolding template (it's the exact convention `/de-init` writes
-> into a fresh `databricks.yml` on Greenfield too — the fix here is
-> applying a rule the kit already enforces by default on new projects);
-> failure alerting comes from `qubika-monitoring-observability`. The
+> bundle scaffolding template (it's the default convention `/de-init`
+> writes into any fresh `databricks.yml` — the fix here is applying a rule
+> the kit already enforces by default on new projects); failure alerting
+> comes from `qubika-monitoring-observability`. The
 > closing move — `/de-audit --sync` — is the clearest "kit vs. no kit"
 > comparison in the whole walkthrough: without it, "prove this got
 > better" means someone's subjective read of the code; with it, you have
@@ -263,7 +262,6 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 ## Where this walkthrough hands off
 
 Once Iteration 3 is deployed and validated, go through
-`docs/final-checklist.md` — the same standards checklist Greenfield ends
-on. A brownfield pass is arguably a better test of it: everything on that
-list is something this project was *missing*, not something built in from
-the start.
+`docs/final-checklist.md` — the standards checklist for this exercise.
+Every item on it maps back to something this project was *missing*, so
+it's a fair final test of whether the gaps actually closed.

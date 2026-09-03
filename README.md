@@ -4,11 +4,6 @@ An onboarding walkthrough for the Qubika AI Dev Kit: **join** an existing,
 already-productive Databricks project — a working but ungoverned NYC Taxi
 pipeline — and bring it up to Qubika standards one layer at a time.
 
-This is the paired counterpart to the Greenfield track (same dataset, same
-kit, opposite starting point): Greenfield builds from an empty folder;
-Brownfield starts from a project that already runs and has to be improved
-without breaking it.
-
 ## What's in this repo
 
 - **`WALKTHROUGH.md`** — start here. The full step-by-step: clone, let
@@ -22,9 +17,9 @@ without breaking it.
   workspace that isn't visible in the code (the hand-built job, its
   departed owner, its cluster config).
 - **`docs/data-profile.md`** — schema and known data-quality issues in
-  `sample_data/raw/` (same data as Greenfield).
-- **`docs/final-checklist.md`** — the standards checklist both tracks end
-  on: `/de-audit`, then a manual pass against Qubika's conventions.
+  `sample_data/raw/`.
+- **`docs/final-checklist.md`** — the standards checklist this exercise
+  ends on: `/de-audit`, then a manual pass against Qubika's conventions.
 - **`sample_data/raw/`** — the data itself: a trimmed real sample of NYC
   Yellow Taxi trip records plus a zone lookup table.
 
