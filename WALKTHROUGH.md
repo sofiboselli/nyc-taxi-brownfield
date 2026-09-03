@@ -97,17 +97,11 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   ```
   cd seed
   ```
-- 2.3 Authenticate the Databricks CLI against `qubika-training`: run
-  `/de-databricks-setup` in Claude Code and follow the prompts — it writes
-  a profile to `~/.databrickscfg` and validates it for you. If you already
-  have a working profile for this workspace, skip this.
-  `/de-databricks-setup` is the kit command; if it asks you to paste a
-  personal access token and you'd rather that not sit in the chat
-  transcript, it offers a plain-CLI alternative — run
-  `databricks configure --host https://dbc-001bbe9b-5a5e.cloud.databricks.com --profile <name> --token`
-  yourself instead. That command is native to the Databricks CLI, not
-  something the kit provides — the kit's own setup flow just points you
-  at it.
+- 2.3 Authenticate the Databricks CLI against `qubika-training` — run
+  `/de-databricks-setup`, the kit's own setup command, and follow the
+  prompts. It writes a profile to `~/.databrickscfg` and validates it for
+  you. If you already have a working profile for this workspace, skip
+  this.
 
 - 2.4 Deploy the seed bundle (still inside `seed/`):
   ```
