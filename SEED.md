@@ -13,6 +13,10 @@ exercise depends on `resources/legacy_infra.yml` still being there.
 
 ## Deploy it
 
+Needs `USE CATALOG`, `CREATE SCHEMA`, and `CREATE VOLUME` on
+`dev_ai_kit_demo_brownfield` — see the main `README.md` prerequisites if
+this fails with a permissions error.
+
 ```bash
 databricks bundle deploy -t dev
 ```
