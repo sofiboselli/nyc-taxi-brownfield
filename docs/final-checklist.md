@@ -9,7 +9,7 @@ ask Claude "how should I fix this?" rather than something to feel bad about.
 ## Step 1 — run the kit's own audit
 
 ```
-/de-audit --catalogs <your_catalog>
+/de-audit --catalogs dev_ai_kit_demo_brownfield
 ```
 
 This is the kit's real, automated check — it scans your repo *and* your
@@ -25,7 +25,10 @@ for.
 ### Naming & catalog conventions
 *(`qubika-unity-catalog-governance`, `qubika-medallion-architecture`)*
 
-- [ ] Catalog follows the `qubika_{env}_{code}` convention
+- [ ] Catalog follows the `qubika_{env}_{code}` convention (this exercise
+      is the documented exception — everyone shares
+      `dev_ai_kit_demo_brownfield` as the training catalog, so the thing
+      to actually check here is schema separation, next item)
 - [ ] Bronze / Silver / Gold live in clearly separate schemas (not all
       tables dumped into one schema)
 - [ ] Table and column names are snake_case and descriptive

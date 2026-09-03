@@ -9,6 +9,7 @@ something to compare the live state against.
 
 | Field | Value |
 |---|---|
+| Catalog / schema | `dev_ai_kit_demo_brownfield.taxi_legacy` — flat schema, tables prefixed `bronze_` / `silver_` / `gold_` instead of separated by layer |
 | Created by | a contractor, ~6 months ago, for a one-off exec demo |
 | Owner | `jsmith@qubika.com` — **no longer with the company** |
 | Schedule | daily, 06:00 UTC (nobody's confirmed anyone still needs this) |

@@ -7,18 +7,18 @@
 # COMMAND ----------
 
 spark.sql("""
-CREATE OR REPLACE TABLE nyc_taxi_analytics.taxi.gold_kpi_by_borough_hour AS
+CREATE OR REPLACE TABLE dev_ai_kit_demo_brownfield.taxi_legacy.gold_kpi_by_borough_hour AS
 SELECT
   pickup_borough,
   pickup_hour,
   COUNT(*)                    AS trip_count,
   SUM(total_amount)           AS total_revenue,
   AVG(tip_pct)                AS avg_tip_pct
-FROM nyc_taxi_analytics.taxi.silver_trips
+FROM dev_ai_kit_demo_brownfield.taxi_legacy.silver_trips
 GROUP BY pickup_borough, pickup_hour
 """)
 
-display(spark.table("nyc_taxi_analytics.taxi.gold_kpi_by_borough_hour").orderBy("total_revenue", ascending=False))
+display(spark.table("dev_ai_kit_demo_brownfield.taxi_legacy.gold_kpi_by_borough_hour").orderBy("total_revenue", ascending=False))
 
 # COMMAND ----------
 

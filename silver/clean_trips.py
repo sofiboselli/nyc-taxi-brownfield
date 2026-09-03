@@ -9,8 +9,8 @@
 
 from pyspark.sql import functions as F
 
-trips = spark.table("nyc_taxi_analytics.taxi.bronze_trips")
-zones = spark.table("nyc_taxi_analytics.taxi.bronze_zones")
+trips = spark.table("dev_ai_kit_demo_brownfield.taxi_legacy.bronze_trips")
+zones = spark.table("dev_ai_kit_demo_brownfield.taxi_legacy.bronze_zones")
 
 silver = (
     trips
@@ -31,7 +31,7 @@ silver = (
     .withColumn("pickup_hour", F.hour(trips.tpep_pickup_datetime))
 )
 
-silver.write.mode("overwrite").saveAsTable("nyc_taxi_analytics.taxi.silver_trips")
+silver.write.mode("overwrite").saveAsTable("dev_ai_kit_demo_brownfield.taxi_legacy.silver_trips")
 print(f"silver_trips: {silver.count()} rows")
 
 # COMMAND ----------

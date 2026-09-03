@@ -35,9 +35,10 @@ You'll need:
 - The AI Dev Kit installed (Claude Code, Cursor, or another supported
   client) — if `/de-init` isn't a recognized command, it isn't installed yet.
 - A Databricks CLI profile for the `qubika-training` workspace, with
-  access to the catalog this project's legacy pipeline already writes to.
-  Run `/de-databricks-setup` if you don't have one yet, or ask whoever set
-  up this exercise.
+  access to the `dev_ai_kit_demo_brownfield` catalog — everything in this
+  exercise, legacy and rebuilt alike, lives inside it. Run
+  `/de-databricks-setup` if you don't have a profile yet, or ask whoever
+  set up this exercise for catalog access.
 - The legacy pipeline (this repo's `bronze/`/`silver/`/`gold/` notebooks)
   already deployed and run at least once against `qubika-training`, so
   there's a real, already-running job to join. If that hasn't happened

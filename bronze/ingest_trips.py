@@ -14,14 +14,14 @@
 landing_path = "/mnt/legacy-landing/taxi/"
 
 trips = spark.read.parquet(landing_path + "yellow_tripdata_2024-01_sample.parquet")
-trips.write.mode("overwrite").saveAsTable("nyc_taxi_analytics.taxi.bronze_trips")
+trips.write.mode("overwrite").saveAsTable("dev_ai_kit_demo_brownfield.taxi_legacy.bronze_trips")
 
 zones = (
     spark.read.option("header", "true")
     .option("inferSchema", "true")
     .csv(landing_path + "taxi_zone_lookup.csv")
 )
-zones.write.mode("overwrite").saveAsTable("nyc_taxi_analytics.taxi.bronze_zones")
+zones.write.mode("overwrite").saveAsTable("dev_ai_kit_demo_brownfield.taxi_legacy.bronze_zones")
 
 print(f"bronze_trips: {trips.count()} rows")
 print(f"bronze_zones: {zones.count()} rows")
