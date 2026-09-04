@@ -34,6 +34,10 @@ databricks fs cp sample_data/raw/taxi_zone_lookup.csv \
 
 ## Run it once
 
+Needs cluster-creation rights in the workspace — see the main
+`README.md` prerequisites if this fails with `PERMISSION_DENIED: You are
+not authorized to create clusters`.
+
 ```bash
 databricks bundle run legacy_taxi_job -t dev
 ```
