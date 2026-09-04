@@ -250,37 +250,29 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   Code to fix what it finds for `gold/kpi_by_borough_hour.py`:
   > "Fix the Gold violations you just found."
 
-  No need to say anything about Silver — Bronze and Silver were both
-  fixed in place, still writing to `taxi_legacy.*`, not a new schema
-  (that only happens in `6.2`'s bundle restructure). Gold's existing
-  `FROM ...taxi_legacy.silver_trips` already points at the right,
-  now-fixed table.
+- 6.2 Close the remaining gaps from the top of this doc and from
+  `/de-audit`'s Step 3 recommendations — individual ownership, no tags, no
+  alerting, no schema separation, and the still-open "0% of tables have a
+  comment" finding:
+  > "This job is owned by one person instead of a group, has no compute
+  > tags, and no failure-alert notifications. Fix that. Also split
+  > `taxi_legacy` into proper Bronze/Silver/Gold schemas instead of one
+  > flat schema with prefixed table names, and finish adding table/column
+  > comments across all three layers."
 
-  Same KPI shape as before, now on real inputs — comment coverage is
-  covered separately (that's `/de-audit`'s governance signal, not this
-  review), so don't expect table/column comments to show up here
-  unprompted either.
-
-- 6.2 Wrap the whole project properly. This is also where the bundle
-  restructuring from the "why this repo doesn't pass" list at the top
-  finally happens — deliberately held until now, once Bronze/Silver/Gold
-  are all fixed and there's a stable end state to formalize, not a moving
-  target one layer at a time:
-  > "This whole project needs to become a real Databricks Asset Bundle —
-  > `databricks.yml`, `resources/`, and `src/` for Bronze/Silver/Gold, not
-  > notebooks edited in place. Set up all three bundle targets — dev,
-  > staging, prod. Add compute tagging. Re-own the job to a group instead
-  > of an individual. Add table and column comments. Configure
-  > failure-alert notifications."
+  Delivering that properly means the project stops being three notebooks
+  edited in place behind a throwaway seed bundle, and becomes a real
+  Databricks Asset Bundle — `databricks.yml`, `resources/`, `src/` for
+  Bronze/Silver/Gold, dev/staging/prod targets. That restructuring isn't
+  the ask itself; it's what Claude Code needs to do underneath to deliver
+  the ask above, deliberately held until now so there's a stable end state
+  to formalize rather than a moving target one layer at a time.
 
   Let Claude propose schema names rather than dictating them —
   `qubika-medallion-architecture` convention favors something like
   `raw_main`/`curated_main`/`analytics_main`, and the kit's scaffolding is
   supposed to confirm exact names with you before creating anything in
-  Unity Catalog. If it just creates something without asking, that's the
-  guardrail not firing, worth flagging. (`dev_ai_kit_demo_brownfield` is
-  the only catalog provisioned for this exercise, so `dev` is the target
-  that actually deploys; staging/prod stay structural placeholders.)
+  Unity Catalog.
 
 - 6.3 Run an end-to-end test, execute the same analytical SQL queries
   against the new Gold table, and re-run `/de-audit --sync` — compare its
