@@ -23,7 +23,10 @@ databricks bundle deploy -t dev
 
 ## Land the sample data
 
-The job reads from the volume this just created. Copy the sample data in:
+Deploying above creates the volume empty — no data in it yet, and the job
+will fail without this step. **Required every time you deploy fresh**
+(including after a `bundle destroy`), not a one-time setup thing. Copy the
+sample data in:
 
 ```bash
 databricks fs cp sample_data/raw/yellow_tripdata_2024-01_sample.parquet \

@@ -103,8 +103,22 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   ```
   databricks bundle deploy -t dev
   ```
-- 2.4 Land the sample data into the volume the seed bundle just created
-  (commands in `SEED.md`), then run the legacy job once:
+  This creates the `taxi_legacy` schema, an empty `landing` volume inside
+  it, and the "Taxi Analytics - Legacy" job — but no data yet. The job
+  will fail if you try to run it now; it has nothing to read.
+
+- 2.4 Copy the sample data into the volume you just created. This is a
+  **required step, not optional** — do it every time you deploy fresh
+  (including after a `bundle destroy`), since a fresh deploy always
+  creates an empty volume:
+  ```
+  databricks fs cp sample_data/raw/yellow_tripdata_2024-01_sample.parquet \
+    dbfs:/Volumes/dev_ai_kit_demo_brownfield/taxi_legacy/landing/yellow_tripdata_2024-01_sample.parquet
+  databricks fs cp sample_data/raw/taxi_zone_lookup.csv \
+    dbfs:/Volumes/dev_ai_kit_demo_brownfield/taxi_legacy/landing/taxi_zone_lookup.csv
+  ```
+
+- 2.5 Now run the legacy job:
   ```
   databricks bundle run legacy_taxi_job -t dev
   ```
