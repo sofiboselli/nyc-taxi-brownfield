@@ -10,8 +10,7 @@ at a time, via VS Code.
 **Dataset:** NYC Yellow Taxi Trip Data
 
 **Catalog:** `dev_ai_kit_demo_brownfield` — the one Unity Catalog catalog
-provisioned for this exercise, created ahead of time by whoever set this
-up (it needs elevated permissions most learners won't have). It's the
+provisioned for this exercise, created ahead of time. It's the
 only thing that isn't self-service — everything else, you build yourself,
 starting with the "already broken" state itself. Layer separation happens
 through schemas within this one catalog.
@@ -31,9 +30,7 @@ inspect and run, not just read about.
 - **Naming & schema separation:** everything lives in one flat schema
   (`dev_ai_kit_demo_brownfield.taxi_legacy`), with Bronze/Silver/Gold
   distinguished only by a table-name prefix (`bronze_`, `silver_`,
-  `gold_`), not separate schemas. The catalog itself is correct — it's the
-  shared training catalog everyone in this exercise uses — the gap is
-  entirely at the schema level.
+  `gold_`), not separate schemas.
 - **Bronze:** `bronze/ingest_trips.py` is a one-shot batch
   `spark.read.parquet()` off a hardcoded DBFS mount path
   (`/mnt/legacy-landing/taxi/`), not Auto Loader. No `_ingested_at` /
@@ -231,7 +228,7 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   up front — that's the kit's conventions doing the work, not you
   supplying the answer.
 
-- 5.3 If claude hasnt already done so, redeploy through the same seed bundle again and re-run:
+- 5.3 If claude hasn't already done so, redeploy through the same seed bundle again and re-run:
   ```
   databricks bundle deploy -t dev
   databricks bundle run legacy_taxi_job -t dev
@@ -279,7 +276,26 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 > exact schema names with you before creating anything in Unity Catalog,
 > not just pick them silently.
 
-- 6.3 Run an end-to-end test, execute the same analytical SQL queries
+- 6.3 Testing is the one item from the intro's list nothing has touched
+  yet — ask Claude Code to close it:
+  > "There's still no test coverage for this pipeline's logic. Add real
+  > unit tests."
+
+  `docs/final-checklist.md`'s Testing section is specific about the shape
+  this should take: tests on the pure transformation logic, not the I/O,
+  runnable without a live Databricks connection. Validate that locally
+  instead of through a bundle deploy:
+  ```
+  pytest
+  ```
+
+> The test structure comes from `qubika-pipeline-testing` — extracting
+> the pure transformation logic out of the notebook so it's testable with
+> plain `pytest`, no Databricks connection required. Worth checking what
+> Claude Code actually extracts and whether the tests would catch a real
+> regression, not just whether they pass.
+
+- 6.4 Run an end-to-end test, execute the same analytical SQL queries
   against the new Gold table, and re-run `/de-audit --sync` — compare its
   recommendations list against the Step 3 snapshot to see the gap close.
 
@@ -292,7 +308,7 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 > the same tool, run twice, producing a ranked list that's measurably
 > shorter.
 
-- 6.4 Claude Code is not perfect — it will miss things from time to time,
+- 6.5 Claude Code is not perfect — it will miss things from time to time,
   which is why this iteration process never really ends. If you notice
   something missing, or something on the final checklist that wasn't
   actually fixed, ask Claude Code to look at it specifically. Having the
@@ -300,7 +316,7 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   generic "fix everything that's wrong" won't get you there, but naming
   the specific gap gets you much further. Even then, verify rather than
   assume it worked: asking specifically doesn't guarantee it fully
-  lands, as `6.2`'s ownership fix in this very walkthrough showed.
+  lands.
 
 ---
 
