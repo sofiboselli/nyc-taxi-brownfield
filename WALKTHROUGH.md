@@ -257,19 +257,25 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   > bundle structure, ownership, tagging, alerting, schema separation?
   > Check and fix whatever's missing."
 
-  Delivering that properly means the project stops being three notebooks
-  edited in place behind a throwaway seed bundle, and becomes a real
-  Databricks Asset Bundle — `databricks.yml`, `resources/`, `src/` for
-  Bronze/Silver/Gold, dev/staging/prod targets. That restructuring isn't
-  the ask itself; it's what Claude Code needs to do underneath to deliver
-  the ask above, deliberately held until now so there's a stable end state
-  to formalize rather than a moving target one layer at a time.
-
-  Let Claude propose schema names rather than dictating them —
-  `qubika-medallion-architecture` convention favors something like
-  `raw_main`/`curated_main`/`analytics_main`, and the kit's scaffolding is
-  supposed to confirm exact names with you before creating anything in
-  Unity Catalog.
+> Unlike every other ask in this walkthrough, this one doesn't point at a
+> review tool's output — there's no `/de-assist review` equivalent for
+> deployment shape. It works through skill matching alone: naming "bundle
+> structure," "ownership," "tagging," "alerting," and "schema separation"
+> is enough for Claude Code to pull in `qubika-databricks-bundles` (the
+> bundle shape — `databricks.yml` + `resources/` + `src/` — and
+> dev/staging/prod targets), `qubika-compute-tagging` (the tag keys),
+> `qubika-monitoring-observability` (the alerting pattern),
+> `qubika-unity-catalog-governance` (the "group, not individual" ownership
+> rule — also just the default `/de-init` writes into any fresh
+> `databricks.yml`, so this is applying a convention the kit already
+> enforces on new projects), and `qubika-medallion-architecture` (the
+> `raw_main`/`curated_main`/`analytics_main` schema-naming convention) —
+> on its own, without any of those being named in the prompt above. Which
+> skills actually fire depends on how the prompt lands and what Claude
+> judges relevant, so it's worth checking what it says it drew on against
+> what you'd expect — and the kit's scaffolding is supposed to confirm
+> exact schema names with you before creating anything in Unity Catalog,
+> not just pick them silently.
 
 - 6.3 Run an end-to-end test, execute the same analytical SQL queries
   against the new Gold table, and re-run `/de-audit --sync` — compare its
@@ -277,18 +283,7 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 
 > The Gold aggregation shape (grouped
 > aggregation + `snapshot_date` partition) comes from
-> `qubika-medallion-architecture`'s Gold pattern. The bundle shape itself
-> (`databricks.yml` + `resources/` + `src/`) comes from
-> `qubika-databricks-bundles` — this is the one point in the whole
-> walkthrough where that skill actually gets used, since Iterations 1-2
-> deliberately deferred it. The rest of the governance cleanup in 6.2
-> draws on several more skills at once, each covering one gap: compute
-> tagging comes from `qubika-compute-tagging`; the "job owner must be a
-> group, never an individual" rule is baked directly into the kit's own
-> bundle scaffolding template (it's the default convention `/de-init`
-> writes into any fresh `databricks.yml` — the fix here is applying a rule
-> the kit already enforces by default on new projects); failure alerting
-> comes from `qubika-monitoring-observability`. The
+> `qubika-medallion-architecture`'s Gold pattern. The
 > closing move — `/de-audit --sync` — is the clearest "kit vs. no kit"
 > comparison in the whole walkthrough: without it, "prove this got
 > better" means someone's subjective read of the code; with it, you have
