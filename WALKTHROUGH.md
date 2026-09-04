@@ -250,13 +250,14 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   Code to fix what it finds for `gold/kpi_by_borough_hour.py`:
   > "Fix the Gold violations you just found."
 
-- 6.2 Look back at the "Why this repo doesn't pass Qubika standards" list
-  at the top of this doc. Deployment, Governance, and Naming & schema
-  separation are the only three bullets neither `/de-audit` nor
-  `/de-assist review` ever checked — point Claude Code at that instead of
-  spelling out the fixes yourself:
-  > "Close the Deployment, Governance, and Naming & schema separation gaps
-  > from the intro of this doc."
+- 6.2 Bronze/Silver/Gold code is fixed now — but look at how the job
+  itself is actually set up: who owns it in the Databricks UI, what's in
+  `resources/legacy_infra.yml`, and what schema(s) exist for this catalog
+  in Unity Catalog:
+  > "This job is owned by me personally instead of a group, has no
+  > compute tags or failure-alert notifications, and the whole project
+  > lives in one flat schema instead of separate Bronze/Silver/Gold ones.
+  > Fix all of that."
 
   Delivering that properly means the project stops being three notebooks
   edited in place behind a throwaway seed bundle, and becomes a real
