@@ -27,8 +27,8 @@ silver = (
         trips.tip_amount,
         trips.total_amount,
     )
-    .withColumn("tip_pct", F.when(trips.fare_amount != 0, trips.tip_amount / trips.fare_amount * 100))
-    .withColumn("pickup_hour", F.hour(trips.tpep_pickup_datetime))
+    .withColumn("tip_pct", F.when(F.col("fare_amount") != 0, F.col("tip_amount") / F.col("fare_amount") * 100))
+    .withColumn("pickup_hour", F.hour(F.col("pickup_ts")))
 )
 
 silver.write.mode("overwrite").saveAsTable("dev_ai_kit_demo_brownfield.taxi_legacy.silver_trips")
