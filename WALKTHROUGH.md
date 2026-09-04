@@ -52,7 +52,8 @@ inspect and run, not just read about.
   just a job deployed once via the throwaway seed bundle (see below) and
   left alone. That seed bundle isn't the project bundle either; it's
   disposable infrastructure that exists only to stand this state up, and
-  gets replaced wholesale in Iteration 1.
+  gets replaced wholesale once, in Iteration 3, after Bronze/Silver/Gold
+  are all fixed and there's a stable end state to formalize.
 - **Governance:** the job is owned by whoever deployed it — one
   individual's account, not a group. No tags, no failure-alert
   notifications, no schedule.
@@ -135,11 +136,7 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   - **"Which catalogs should I scan?"** — answer just
     `dev_ai_kit_demo_brownfield`, not all visible `qubika_*` catalogs.
   - **"Include `--deep` cost analysis?"** — decline. Cost/usage isn't
-    part of what this exercise tests, and `--deep` needs `SELECT` on
-    `system.query.history` / `system.billing.usage` plus a reachable SQL
-    warehouse — a permission dependency not worth adding for something
-    out of scope. `qubika-cost-investigator` is the dedicated tool if you
-    want that angle separately.
+    part of what this exercise tests.
 
 - 3.2 Read the top priorities `/de-init` surfaces. `/de-audit`'s scope is
   governance and drift — ownership gaps, missing `CLAUDE.md`, stale jobs,
@@ -177,44 +174,36 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 > what covers the full "why this repo doesn't pass" list at the top of
 > this doc. Neither one alone does.
 
-- 3.4 It'll end by asking whether to leave the violations as-is or fix
+- 3.4 It may end by asking whether to leave the violations as-is or fix
   them now. **Decline.** Iterations 1–3 below fix things deliberately,
   one layer at a time, deployed and validated separately — not all at
   once from this one prompt.
 
-### 4. Iteration 1: The Bronze Layer — From Notebook to Bundle
+### 4. Iteration 1: The Bronze Layer
 
 - 4.1 Ask Claude Code, in your own words, to fix what `/de-assist review`
   found for `bronze/ingest_trips.py`:
   > "Fix the Bronze violations you just found."
 
   This fixes exactly what the review flagged — catalog paths, metadata
-  columns, incremental read — and, on its own, nothing more. It will
-  **not** restructure the project into a bundle; project structure isn't
-  one of the things `/de-assist review` checks, so that's a separate ask,
-  next.
+  columns, incremental read — and, on its own, nothing more. It stays a
+  notebook, still writing to `taxi_legacy`, for now — bundle-ifying the
+  whole project happens once, in Iteration 3, after all three layers are
+  fixed. There's no natural mid-Bronze reason to ask for it here: neither
+  audit tool flags project structure, and a bundle isn't something you
+  build one layer at a time anyway.
 
-- 4.2 Ask for the bundle explicitly. This is a structural requirement the
-  exercise itself calls for (see "why this repo doesn't pass" at the
-  top), not something either audit tool discovers on its own:
-  > "This needs to be a proper Databricks Asset Bundle, not a notebook
-  > edited in place — `databricks.yml`, `resources/`, and `src/ingest/`,
-  > targeting a new schema separate from the legacy `taxi_legacy` tables."
+- 4.2 Redeploy through the same seed bundle from Step 2 — nothing new to
+  set up. `resources/legacy_infra.yml`'s job already points at this
+  notebook, so redeploying just picks up the fix:
+  ```
+  databricks bundle deploy -t dev
+  databricks bundle run legacy_taxi_job -t dev
+  ```
 
-  Let Claude propose the specific schema name rather than dictating one —
-  `qubika-medallion-architecture` convention favors something like
-  `raw_main`, and the kit's scaffolding is supposed to confirm the exact
-  name with you before creating it in Unity Catalog. If it just creates
-  something without asking, that's the guardrail not firing, worth
-  flagging.
-
-- 4.3 Ask Claude Code to deploy this first bundle version to the Databricks
-  sandbox (Bronze only — Silver/Gold still point at the old tables for now).
-
-- 4.4 **Validation in Databricks:** run the job, confirm the new Bronze
-  tables land correctly in Unity Catalog, and compare row counts against
-  the legacy `dev_ai_kit_demo_brownfield.taxi_legacy.bronze_trips` /
-  `bronze_zones` tables — they should match.
+- 4.3 **Validation in Databricks:** confirm the job ran clean, and that
+  `bronze_trips` / `bronze_zones` now carry `_ingested_at` /
+  `_source_file` — same tables as before, fixed in place.
 
 > The Auto Loader code Claude Code writes
 > draws on a specific, named pattern in `qubika-streaming-pipelines` (the
@@ -222,23 +211,19 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 > `_source_file` metadata-column convention comes from
 > `qubika-medallion-architecture` — it won't necessarily match the skill's
 > own example line for line, though, so it's worth actually diffing what
-> you get against the skill file rather than assuming it's identical. The
-> bundle shape itself (`databricks.yml` + `resources/` + `src/`) comes
-> from `qubika-databricks-bundles`. Also watch for this: the kit's own
-> scaffolding refuses to silently create catalog or schema objects — it's
-> supposed to ask you to confirm the exact name before creating anything
-> in Unity Catalog.
+> you get against the skill file rather than assuming it's identical.
 
 ### 5. Iteration 2: The Silver Layer — Adding the Quality Gate That Was Never There
 
-- 5.1 Now that Bronze is on the bundle, re-run `/de-assist review` and ask
+- 5.1 Now that Bronze is fixed, re-run `/de-assist review` and ask
   Claude Code to fix what it finds for `silver/clean_trips.py`:
   > "Fix the Silver violations you just found."
 
   This gets you `MERGE` instead of `overwrite` and Delta constraints — the
   two things the review actually checks for Silver. It won't add data
   quality enforcement on its own; "no DQX" isn't a line item in the
-  review's checklist either, same pattern as the bundle in Iteration 1.
+  review's checklist, same as project structure wasn't in Iteration 1 —
+  the review only ever fixes exactly what it checks for.
 
 - 5.2 Ask for that explicitly:
   > "There's no data quality enforcement here at all — every negative
@@ -255,7 +240,11 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   convention nudges, the DQX pattern reference — this is the moment to
   show the kit steering the work, not just generating code.
 
-- 5.4 Deploy the update and re-run in Databricks.
+- 5.4 Redeploy through the same seed bundle again and re-run:
+  ```
+  databricks bundle deploy -t dev
+  databricks bundle run legacy_taxi_job -t dev
+  ```
 
 > The DQX rules Claude Code writes come from
 > `qubika-data-quality` — `DQRowRule`/`DQDatasetRule`, `criticality`
@@ -279,16 +268,26 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   review), so don't expect table/column comments to show up here
   unprompted either.
 
-- 6.2 Wrap the project's governance, explicitly — closing what
-  `docs/first-steps.md` flagged in Step 3, and covering things neither
-  audit tool catches on its own:
-  > "Set up all three bundle targets — dev, staging, prod. Add compute
-  > tagging. Re-own the job to a group instead of an individual. Add
-  > table and column comments. Configure failure-alert notifications."
+- 6.2 Wrap the whole project properly. This is also where the bundle
+  restructuring from the "why this repo doesn't pass" list at the top
+  finally happens — deliberately held until now, once Bronze/Silver/Gold
+  are all fixed and there's a stable end state to formalize, not a moving
+  target one layer at a time:
+  > "This whole project needs to become a real Databricks Asset Bundle —
+  > `databricks.yml`, `resources/`, and `src/` for Bronze/Silver/Gold, not
+  > notebooks edited in place. Set up all three bundle targets — dev,
+  > staging, prod. Add compute tagging. Re-own the job to a group instead
+  > of an individual. Add table and column comments. Configure
+  > failure-alert notifications."
 
-  (`dev_ai_kit_demo_brownfield` is the only catalog provisioned for this
-  exercise, so `dev` is the target that actually deploys; staging/prod
-  stay structural placeholders.)
+  Let Claude propose schema names rather than dictating them —
+  `qubika-medallion-architecture` convention favors something like
+  `raw_main`/`curated_main`/`analytics_main`, and the kit's scaffolding is
+  supposed to confirm exact names with you before creating anything in
+  Unity Catalog. If it just creates something without asking, that's the
+  guardrail not firing, worth flagging. (`dev_ai_kit_demo_brownfield` is
+  the only catalog provisioned for this exercise, so `dev` is the target
+  that actually deploys; staging/prod stay structural placeholders.)
 
 - 6.3 Run an end-to-end test, execute the same analytical SQL queries
   against the new Gold table, and re-run `/de-audit --sync` — compare its
@@ -296,8 +295,12 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 
 > The Gold aggregation shape (grouped
 > aggregation + `snapshot_date` partition) comes from
-> `qubika-medallion-architecture`'s Gold pattern. The governance cleanup
-> in 6.2 draws on several skills at once, each covering one gap: compute
+> `qubika-medallion-architecture`'s Gold pattern. The bundle shape itself
+> (`databricks.yml` + `resources/` + `src/`) comes from
+> `qubika-databricks-bundles` — this is the one point in the whole
+> walkthrough where that skill actually gets used, since Iterations 1-2
+> deliberately deferred it. The rest of the governance cleanup in 6.2
+> draws on several more skills at once, each covering one gap: compute
 > tagging comes from `qubika-compute-tagging`; the "job owner must be a
 > group, never an individual" rule is baked directly into the kit's own
 > bundle scaffolding template (it's the default convention `/de-init`
