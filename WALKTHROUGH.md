@@ -250,15 +250,13 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   Code to fix what it finds for `gold/kpi_by_borough_hour.py`:
   > "Fix the Gold violations you just found."
 
-- 6.2 Close the remaining gaps from the top of this doc and from
-  `/de-audit`'s Step 3 recommendations — individual ownership, no tags, no
-  alerting, no schema separation, and the still-open "0% of tables have a
-  comment" finding:
-  > "This job is owned by one person instead of a group, has no compute
-  > tags, and no failure-alert notifications. Fix that. Also split
-  > `taxi_legacy` into proper Bronze/Silver/Gold schemas instead of one
-  > flat schema with prefixed table names, and finish adding table/column
-  > comments across all three layers."
+- 6.2 Look back at the "Why this repo doesn't pass Qubika standards" list
+  at the top of this doc. Deployment, Governance, and Naming & schema
+  separation are the only three bullets neither `/de-audit` nor
+  `/de-assist review` ever checked — point Claude Code at that instead of
+  spelling out the fixes yourself:
+  > "Close the Deployment, Governance, and Naming & schema separation gaps
+  > from the intro of this doc."
 
   Delivering that properly means the project stops being three notebooks
   edited in place behind a throwaway seed bundle, and becomes a real
