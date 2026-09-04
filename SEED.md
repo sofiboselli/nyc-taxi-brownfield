@@ -50,9 +50,19 @@ to join.
 ## Why it's built the way it is
 
 Every choice in `resources/legacy_infra.yml` is deliberate, not sloppy
-YAML — see the comment at the top of that file for exactly which
-anti-pattern each piece represents (no tags, no schedule, no explicit
-ownership, and a note on why compute is serverless here instead of the
-classic misconfigured-cluster anti-pattern a real legacy job would more
-likely have). It's documented there rather than here so the "why" sits
-next to the code it explains.
+YAML — the file itself stays clean (no narration explaining what's wrong
+with it, on purpose), so the explanation lives here instead:
+
+- No `tags`, no `email_notifications`, and no `schedule` block on the job
+  (a real version of this would be scheduled and left running — we don't
+  provision that here so a shared training workspace doesn't accumulate a
+  daily job per learner).
+- No `permissions:` block — whoever runs `bundle deploy` becomes the sole
+  owner, which is the point: an individual, not a group.
+- Compute is serverless (no `job_clusters` block) rather than a classic
+  all-purpose cluster — a real version of this legacy job would more
+  likely be on a shared classic cluster with no autotermination and an
+  old runtime, but that requires cluster-creation rights most learners
+  won't have. Serverless sidesteps that permission entirely, at the cost
+  of losing the "no autotermination" anti-pattern as something you
+  actually discover and fix.

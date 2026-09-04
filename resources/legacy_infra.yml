@@ -1,30 +1,9 @@
-# What this deploys, and why each part is deliberately wrong:
-#
-# - A schema + landing volume inside the pre-provisioned catalog — this
-#   part is fine, it's just plumbing for the exercise.
-# - A job wired to the three legacy notebooks (../bronze, ../silver,
-#   ../gold — relative to this file), configured the way a rushed
-#   one-off actually gets deployed: no tags, no failure notifications, and
-#   no schedule (a real version of this would be scheduled and left
-#   running — we don't provision that here so a shared training workspace
-#   doesn't accumulate a daily job per learner). No `permissions:` block
-#   either: whoever runs `bundle deploy` becomes the owner, which is the
-#   point — an individual, not a group.
-#
-# Compute is serverless (no job_clusters block) rather than a classic
-# all-purpose cluster — a real version of this legacy job would more
-# likely be on a shared classic cluster with no autotermination and an
-# old runtime, but that requires cluster-creation rights most learners
-# won't have. Serverless sidesteps that permission entirely, at the cost
-# of losing the "no autotermination" anti-pattern as something you
-# actually discover and fix — it's described here instead, not deployed.
-
 resources:
   schemas:
     taxi_legacy:
       catalog_name: ${var.catalog}
       name: taxi_legacy
-      comment: "Legacy NYC taxi pipeline — flat, unlayered, pre-kit. Seeded for the brownfield exercise."
+      comment: "Legacy NYC taxi pipeline."
 
   volumes:
     landing:

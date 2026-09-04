@@ -1,29 +1,7 @@
-# Seed bundle — stands up the "already productive" legacy mess.
-#
-# This is throwaway infrastructure-as-code, not the project bundle. It
-# exists so anyone can materialize the brownfield starting state
-# themselves (schema, landing volume, the badly-configured job) instead of
-# depending on someone manually clicking through the Databricks UI first.
-# Deploy it once at the start of the exercise, then leave it alone.
-#
-# It lives at the repo root (not a nested seed/ folder) because Databricks
-# Asset Bundles only allow resources to reference files inside the bundle's
-# own root — and the notebooks it deploys (bronze/, silver/, gold/) need to
-# stay at the root anyway, since that's what /de-init's brownfield
-# detector looks for. In Iteration 1 you'll replace this file's contents
-# with the real project bundle — same filename, different job.
-#
-# The one thing this does NOT create is the catalog itself — that needs
-# elevated permissions not every learner has, so it's provisioned once,
-# out of band, by whoever set up this exercise. Everything inside the
-# catalog is self-service from here.
-
 bundle:
   name: nyc-taxi-brownfield-seed
 
-# mode: development prefixes UC schema names with "<user>_" by default (a
-# real, workspace-verified behavior — confirmed the hard way: the schema
-# actually deployed as `dev_sofia_boselli_taxi_legacy`, not `taxi_legacy`).
+# mode: development prefixes UC schema names with "<user>_" by default.
 # The notebooks hardcode the exact schema path rather than a bundle
 # variable, so a prefixed name breaks them. `presets.name_prefix: ""`
 # looks like the obvious fix and is NOT — it doesn't touch schema naming
@@ -36,7 +14,7 @@ include:
 
 variables:
   catalog:
-    description: "The pre-provisioned Unity Catalog catalog for this exercise"
+    description: "Unity Catalog catalog for this project"
     default: dev_ai_kit_demo_brownfield
 
 targets:
