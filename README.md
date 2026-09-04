@@ -35,15 +35,7 @@ You'll need:
 - A Databricks CLI profile for the `qubika-training` workspace. Run
   `/de-databricks-setup` if you don't have one yet.
 - On the `dev_ai_kit_demo_brownfield` catalog ask for `USE CATALOG`, `CREATE SCHEMA`,
-  and `CREATE VOLUME`:
-  ```sql
-  GRANT USE CATALOG, CREATE SCHEMA, CREATE VOLUME
-  ON CATALOG dev_ai_kit_demo_brownfield TO `<your-user-or-group>`;
-  ```
-- In the workspace itself, ask for cluster-creation rights ("Allow
-  unrestricted cluster creation") — the seed job's cluster needs it, and
-  without it the run fails with `PERMISSION_DENIED: You are not
-  authorized to create clusters`.
+  and `CREATE VOLUME`.
 
 That's it — everything else, including the "already broken" pipeline
 itself, you deploy yourself in `WALKTHROUGH.md` Step 2.

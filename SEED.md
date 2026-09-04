@@ -34,9 +34,7 @@ databricks fs cp sample_data/raw/taxi_zone_lookup.csv \
 
 ## Run it once
 
-Needs cluster-creation rights in the workspace — see the main
-`README.md` prerequisites if this fails with `PERMISSION_DENIED: You are
-not authorized to create clusters`.
+Runs on serverless compute — no cluster-creation rights needed.
 
 ```bash
 databricks bundle run legacy_taxi_job -t dev
@@ -50,7 +48,8 @@ to join.
 
 Every choice in `resources/legacy_infra.yml` is deliberate, not sloppy
 YAML — see the comment at the top of that file for exactly which
-anti-pattern each piece represents (shared cluster with no
-autotermination, no tags, no schedule, no explicit ownership). It's
-documented there rather than here so the "why" sits next to the code it
-explains.
+anti-pattern each piece represents (no tags, no schedule, no explicit
+ownership, and a note on why compute is serverless here instead of the
+classic misconfigured-cluster anti-pattern a real legacy job would more
+likely have). It's documented there rather than here so the "why" sits
+next to the code it explains.

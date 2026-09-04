@@ -55,7 +55,7 @@ inspect and run, not just read about.
   gets replaced wholesale in Iteration 1.
 - **Governance:** the job is owned by whoever deployed it — one
   individual's account, not a group. No tags, no failure-alert
-  notifications, no autotermination on the cluster.
+  notifications, no schedule.
 - **Testing:** none. Not one unit test anywhere in the repo.
 
 The pipeline isn't *broken* — the numbers it produces are directionally
@@ -244,8 +244,7 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   `dev_ai_kit_demo_brownfield` is the only catalog provisioned for this
   exercise; staging/prod stay structural placeholders), compute tagging,
   the job re-owned by a **group** instead of whoever happened to run
-  `bundle deploy` in Step 2, failure-alert notifications configured,
-  autotermination set on every cluster.
+  `bundle deploy` in Step 2, failure-alert notifications configured.
 - 6.3 Run an end-to-end test, execute the same analytical SQL queries
   against the new Gold table, and re-run `/de-audit --sync` — compare its
   recommendations list against the Step 3 snapshot to see the gap close.
