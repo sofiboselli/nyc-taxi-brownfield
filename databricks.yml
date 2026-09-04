@@ -21,6 +21,16 @@
 bundle:
   name: nyc-taxi-brownfield-seed
 
+# mode: development prefixes UC schema names with "<user>_" by default (a
+# real, workspace-verified behavior — confirmed the hard way: the schema
+# actually deployed as `dev_sofia_boselli_taxi_legacy`, not `taxi_legacy`).
+# The notebooks hardcode the exact schema path rather than a bundle
+# variable, so a prefixed name breaks them. `presets.name_prefix: ""`
+# looks like the obvious fix and is NOT — it doesn't touch schema naming
+# at all. This dedicated flag is the one that does.
+experimental:
+  skip_name_prefix_for_schema: true
+
 include:
   - resources/*.yml
 
@@ -33,14 +43,5 @@ targets:
   dev:
     default: true
     mode: development
-    # mode: development's default presets prefix resource names (jobs,
-    # and — this is the important one — schemas) with "[dev <user>] " /
-    # "<user>_" so multiple engineers can dev-deploy the same bundle
-    # without colliding. That breaks this bundle specifically: the
-    # notebooks hardcode the exact schema path (dev_ai_kit_demo_brownfield.
-    # taxi_legacy), not a bundle variable, so a prefixed schema name won't
-    # match. Disabling the prefix keeps names exactly as declared.
-    presets:
-      name_prefix: ""
     workspace:
       host: https://dbc-001bbe9b-5a5e.cloud.databricks.com

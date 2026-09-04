@@ -110,8 +110,7 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   ```
   At this point `dev_ai_kit_demo_brownfield.taxi_legacy` has real tables
   in it, produced by a real (if badly configured) job — the same thing a
-  brownfield engineer would find on day one, except you now know exactly
-  how it was made, which `SEED.md` documents in full.
+  brownfield engineer would find on day one.
 
 ### 3. Onboarding with Claude Code
 
