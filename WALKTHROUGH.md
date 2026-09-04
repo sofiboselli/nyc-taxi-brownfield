@@ -201,13 +201,15 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   `bronze_trips` / `bronze_zones` now carry `_ingested_at` /
   `_source_file` — same tables as before, fixed in place.
 
-> The Auto Loader code Claude Code writes
-> draws on a specific, named pattern in `qubika-streaming-pipelines` (the
+> The Bronze "checkpoint/incremental pattern" check in `/de-assist review`
+> draws on `qubika-streaming-pipelines`'s Auto Loader convention (the
 > `cloudFiles` format, `schemaLocation`), and the `_ingested_at` /
 > `_source_file` metadata-column convention comes from
-> `qubika-medallion-architecture` — it won't necessarily match the skill's
-> own example line for line, though, so it's worth actually diffing what
-> you get against the skill file rather than assuming it's identical.
+> `qubika-medallion-architecture`. Whether Claude Code actually switches
+> the read over to Auto Loader, versus just adding the metadata columns
+> to the existing batch read, varies by run — worth checking what you
+> actually got against the skill file rather than assuming it's Auto
+> Loader just because the review passed.
 
 ### 5. Iteration 2: The Silver Layer — Adding the Quality Gate That Was Never There
 
@@ -289,6 +291,16 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 > better" means someone's subjective read of the code; with it, you have
 > the same tool, run twice, producing a ranked list that's measurably
 > shorter.
+
+- 6.4 Claude Code is not perfect — it will miss things from time to time,
+  which is why this iteration process never really ends. If you notice
+  something missing, or something on the final checklist that wasn't
+  actually fixed, ask Claude Code to look at it specifically. Having the
+  kit installed means it knows what and how things should change — a
+  generic "fix everything that's wrong" won't get you there, but naming
+  the specific gap gets you much further. Even then, verify rather than
+  assume it worked: asking specifically doesn't guarantee it fully
+  lands, as `6.2`'s ownership fix in this very walkthrough showed.
 
 ---
 
