@@ -186,12 +186,7 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   > "Fix the Bronze violations you just found."
 
   This fixes exactly what the review flagged — catalog paths, metadata
-  columns, incremental read — and, on its own, nothing more. It stays a
-  notebook, still writing to `taxi_legacy`, for now — bundle-ifying the
-  whole project happens once, in Iteration 3, after all three layers are
-  fixed. There's no natural mid-Bronze reason to ask for it here: neither
-  audit tool flags project structure, and a bundle isn't something you
-  build one layer at a time anyway.
+  columns, incremental read — and, on its own, nothing more.
 
 - 4.2 Redeploy through the same seed bundle from Step 2 — nothing new to
   set up. `resources/legacy_infra.yml`'s job already points at this
@@ -200,6 +195,7 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   databricks bundle deploy -t dev
   databricks bundle run legacy_taxi_job -t dev
   ```
+  Claude Code isn't perfect, the job may fail because of errors it commits. This is just normal when developing with AI, if it fails just tell claude about it and it will fix it. Keep in mind that some fixes may be longer than others, depends on what claude decides to do. 
 
 - 4.3 **Validation in Databricks:** confirm the job ran clean, and that
   `bronze_trips` / `bronze_zones` now carry `_ingested_at` /
@@ -226,21 +222,14 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   the review only ever fixes exactly what it checks for.
 
 - 5.2 Ask for that explicitly:
-  > "There's no data quality enforcement here at all — every negative
-  > fare, every null, and every garbage timestamp in the source data
-  > flows straight through untouched. Add real checks."
+  > "There's no data quality enforcement here at all. Add real checks."
 
   Let Claude propose the specifics (which DQX rules, what's `error` vs.
   `warn`, where rejected rows land) rather than naming a quarantine table
   up front — that's the kit's conventions doing the work, not you
   supplying the answer.
 
-- 5.3 Highlight the Kit in action: Qubika guardrails/hooks asking for
-  confirmation before touching anything in a prod-like catalog, naming
-  convention nudges, the DQX pattern reference — this is the moment to
-  show the kit steering the work, not just generating code.
-
-- 5.4 Redeploy through the same seed bundle again and re-run:
+- 5.3 If claude hasnt already done so, redeploy through the same seed bundle again and re-run:
   ```
   databricks bundle deploy -t dev
   databricks bundle run legacy_taxi_job -t dev
@@ -258,10 +247,14 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
 ### 6. Iteration 3: Gold Layer & Closing the Governance Gaps
 
 - 6.1 Same pattern once more — re-run `/de-assist review`, then ask Claude
-  Code to fix what it finds for `gold/kpi_by_borough_hour.py` and rebuild
-  it on the new Silver table:
-  > "Fix the Gold violations you just found, and rebuild this to read
-  > from the new Silver table instead of the legacy one."
+  Code to fix what it finds for `gold/kpi_by_borough_hour.py`:
+  > "Fix the Gold violations you just found."
+
+  No need to say anything about Silver — Bronze and Silver were both
+  fixed in place, still writing to `taxi_legacy.*`, not a new schema
+  (that only happens in `6.2`'s bundle restructure). Gold's existing
+  `FROM ...taxi_legacy.silver_trips` already points at the right,
+  now-fixed table.
 
   Same KPI shape as before, now on real inputs — comment coverage is
   covered separately (that's `/de-audit`'s governance signal, not this
