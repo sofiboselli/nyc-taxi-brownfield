@@ -32,10 +32,10 @@ inspect and run, not just read about.
   distinguished only by a table-name prefix (`bronze_`, `silver_`,
   `gold_`), not separate schemas.
 - **Bronze:** `bronze/ingest_trips.py` is a one-shot batch
-  `spark.read.parquet()` off a hardcoded DBFS mount path
-  (`/mnt/legacy-landing/taxi/`), not Auto Loader. No `_ingested_at` /
-  `_source_file` metadata columns, and no way to land two months of data
-  side by side without renaming the table.
+  `spark.read.parquet()` off a hardcoded landing path
+  (`/Volumes/dev_ai_kit_demo_brownfield/taxi_legacy/landing/`), not Auto
+  Loader. No `_ingested_at` / `_source_file` metadata columns, and no way
+  to land two months of data side by side without renaming the table.
 - **Silver:** `silver/clean_trips.py` has zero data-quality enforcement.
   No DQX, no Delta constraints, no quarantine table. Every negative fare,
   null, and garbage timestamp already in `sample_data/` has been flowing
@@ -57,7 +57,7 @@ inspect and run, not just read about.
 - **Testing:** none. Not one unit test anywhere in the repo.
 
 The pipeline isn't *broken* — the numbers it produces are directionally
-fine, it just doesn't meet the standards we want to enforce at Qubika to ensure the secuirty, organization and data quality we promise to our clients. 
+fine, it just doesn't meet the standards we want to enforce at Qubika to ensure the security, organization and data quality we promise to our clients. 
 
 **Approach:** Audit → Fix → Deploy → Validate in Databricks → Repeat.
 
@@ -192,7 +192,7 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   databricks bundle deploy -t dev
   databricks bundle run legacy_taxi_job -t dev
   ```
-  Claude Code isn't perfect, the job may fail because of errors it commits. This is just normal when developing with AI, if it fails just tell claude about it and it will fix it. Keep in mind that some fixes may be longer than others, depends on what claude decides to do. 
+  Claude Code isn't perfect, the job may fail because of errors it commits. This is just normal when developing with AI, if it fails just tell claude about it and it will fix it. Keep in mind that some fixes may be longer than others, depends on what claude decides to do. Don't be surprised if Bronze takes two or three rounds of deploy → run → report the error → fix before the job goes green — that's normal here, not a sign you broke something.
 
 - 4.3 **Validation in Databricks:** confirm the job ran clean, and that
   `bronze_trips` / `bronze_zones` now carry `_ingested_at` /
