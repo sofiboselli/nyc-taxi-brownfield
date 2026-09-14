@@ -24,18 +24,10 @@ Run:
 > `/de-doctor`
 
 **Validation:** read the pass/warn/fail table for real, don't skim past a
-`[!]`. Then check it against something it can't actually see: if any MCP
-server your session depends on has failed to connect — a real, common
-failure mode, not a hypothetical — see whether `/de-doctor` flagged it
-anywhere in the output.
-
-It won't. Read literally, `/de-doctor`'s own documentation lists MCP
-server health as a *future* slice, not yet implemented — the current
+`[!]`. The current
 checks cover prerequisites (git/python/node/CLI versions), auth, kit
 install integrity, and tracker file permissions. A clean `/de-doctor` run
-means those specific things are fine, not that every tool your session
-depends on is reachable. Worth knowing the boundary of what "healthy"
-actually covers before trusting it as a full green light.
+means those specific things are fine.
 
 ---
 
@@ -45,17 +37,29 @@ Run:
 
 > `/de-track start "load-test synthetic volume"`
 
+**What this should do:** `/de-track` checks for a credentials file before
+anything else. If it's present, you get a real checkpoint — a feature
+switch, with token counts for whatever was open before. If it's missing
+(a fresh install, or a workspace where tracking was never wired up), it
+should never silently proceed as if tracking is on. Expect it to offer to
+bootstrap tracking non-interactively; if that bootstrap fails — most
+likely because the `claude-code-tracker` secret scope isn't provisioned
+in this workspace, which is a one-time admin action, not something an
+individual engineer can self-serve — it should name the fallback
+(`setup_tracker.sh`, with credentials pasted by a team lead) and state
+plainly that this session's usage, including this checkpoint, was not
+recorded. A command that reports success here without a real credentials
+file has quietly started lying to you about cost attribution.
+
 **Validation:** don't just read the confirmation message — check the
 numbers. If a different feature was already open from earlier work,
 confirm *that* one's token delta got closed out and reported before this
 one starts, and that the counts look like a real conversation's worth of
-tokens, not zero.
-
-`/de-track` is gated on a credentials file a fresh install won't have. If
-this session never set that up, starting a checkpoint should say so
-rather than silently recording nothing — and if it's missing, that's
-worth noticing on its own: every hour spent with this kit up to now may
-not be showing up anywhere for attribution.
+tokens, not zero. If tracking turned out to be unconfigured, confirm the
+command said so outright rather than reporting a checkpoint it didn't
+actually write — and if it's missing, that's worth noticing on its own:
+every hour spent with this kit up to now may not be showing up anywhere
+for attribution.
 
 ---
 
