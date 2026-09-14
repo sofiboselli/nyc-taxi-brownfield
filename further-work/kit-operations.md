@@ -69,6 +69,12 @@ Run (it's interactive — answer its questions as they come):
 
 > `/de-synthetic-data`
 
+Unlike `/de-doctor` and `/de-track`, this command wraps a named skill —
+expect it to announce `[Using skill: qubika-synthetic-data]` before it
+asks you anything. That's the source of the conventions the rest of this
+step checks: the gated confirmations, the `synthetic_*` naming, the
+comment marking the data as fake.
+
 When it asks for a domain, describe this project's own schema (trip
 records, zone lookups) instead of reaching for the built-in banking
 template, and give it a volume that matches an actual load-test target —
