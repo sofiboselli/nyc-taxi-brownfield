@@ -67,9 +67,18 @@ fits.
 **Validation:** the column it embeds must be the actual text column —
 if it points at a primary key or numeric ID instead, that's not a
 config nitpick, it's a broken index that will "work" (return results)
-while returning nonsense. Once it's built, actually query it — ask
-something that doesn't share exact words with any note — and confirm
-real, relevant text comes back, not an empty or garbage result.
+while returning nonsense. Once it's built, actually query it with:
+
+> "If a rider was picked up at one of the two NYC airports, would the
+> pricing work the same as everywhere else in that borough?"
+
+That question shares no real terms with the Queens note it should
+surface — it never says "JFK," "LaGuardia," "fare," "flat-rate," or
+"surcharge," all of which are in the actual note. Confirm the Queens
+note comes back as the top (or a top) result. If it doesn't, or if
+nothing relevant comes back at all, that's a real index problem —
+either the embedding source column is wrong or the notes never actually
+indexed — not something to shrug off.
 
 > There are two Qubika skills that cover this ground, with slightly
 > different conventions for naming and endpoints — worth checking which
