@@ -192,7 +192,7 @@ fine, it just doesn't meet the standards we want to enforce at Qubika to ensure 
   databricks bundle deploy -t dev
   databricks bundle run legacy_taxi_job -t dev
   ```
-  Claude Code isn't perfect, the job may fail because of errors it commits. This is just normal when developing with AI, if it fails just tell claude about it and it will fix it. Keep in mind that some fixes may be longer than others, depends on what claude decides to do. Don't be surprised if Bronze takes two or three rounds of deploy → run → report the error → fix before the job goes green — that's normal here, not a sign you broke something.
+  Claude Code isn't perfect, the job may fail because of errors it commits. This is just normal when developing with AI, if it fails just tell claude about it and it will fix it. Keep in mind that some fixes may be longer than others, depends on what claude decides to do. Don't be surprised if Bronze takes two or three rounds of deploy → run → report the error → fix before the job goes green.
 
 - 4.3 **Validation in Databricks:** confirm the job ran clean, and that
   `bronze_trips` / `bronze_zones` now carry `_ingested_at` /

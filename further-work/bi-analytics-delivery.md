@@ -26,15 +26,13 @@ to `bronze.*` or `silver.*` — those aren't curated for someone outside
 the team to query directly.
 
 **Also needed:** a SQL warehouse in the shared workspace, and permission
-to use it. If you don't have one, that's the same kind of ask-your-team-
-lead prerequisite as the catalog grants back in the main README — resolve
-it before Step 1, not mid-way through.
+to use it.
 
 ---
 
 ## Step 1: "A different question every time"
 
-Ask Claude Code, describing the need rather than naming a tool:
+Ask Claude Code:
 
 > "A stakeholder wants to ask this Gold table questions in plain English
 > — a different question every time, no SQL. Set that up."
@@ -72,8 +70,7 @@ Ask Claude Code:
 Before it builds anything, expect Claude Code to stop and confirm a plan
 with you first — which catalog, which warehouse, what pages and widgets
 — rather than deploying straight away. Don't rubber-stamp it without
-reading it; that's the same "verify, don't assume it landed" discipline
-from the main walkthrough, just earlier in the process this time.
+reading it.
 
 **Validation:** the real test isn't that a dashboard object exists — it's
 that every widget on it actually renders real numbers instead of

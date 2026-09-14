@@ -18,10 +18,6 @@ come up *after* deployment:
 - The job succeeding doesn't mean the data is still healthy — would you
   actually notice if it started quietly drifting?
 
-None of this was on the original "why this repo doesn't pass" list — it
-only becomes the obvious next question once you're the one who owns a
-live pipeline instead of the one just trying to get it working.
-
 **Prerequisite:** Brownfield completed through Iteration 3 — the job
 deployed and run at least once via the restructured bundle, schemas
 split (`bronze`/`silver`/`gold`/`quarantine`), tags and group ownership
@@ -32,7 +28,7 @@ in place.
 `system.catalog`). They must be enabled and granted by a metastore admin
 — `USE CATALOG` on `system`, plus `USE SCHEMA` + `SELECT` on each schema
 above. If a query below fails with a permission or "table not found"
-error, that's the fix, not a bug in what you asked for.
+error, that's the fix.
 
 ---
 
@@ -52,7 +48,7 @@ most (DBU, duration, or bytes scanned), scoped to this job's warehouse,
 not the whole shared workspace. Check that the numbers are plausible
 against what you actually ran: three iterations' worth of redeploys and
 job runs, on serverless compute, against a 150k-row dataset — this should
-read as a small, cheap pipeline, not a mystery bill.
+read as a small, cheap pipeline.
 
 > This pulls from `qubika-cost-investigator`, which reads
 > `system.query.history` and `system.billing.usage` — read-only, it never
@@ -76,8 +72,7 @@ were only ever checked against this one job. Ask:
 **Validation:** this should run a tagging-compliance query across all
 jobs in `dev_ai_kit_demo_brownfield`'s workspace, not just
 `legacy_taxi_job`. You already know from Brownfield Step 3 that this
-workspace has other jobs in it — some stale, never run
-(`/de-audit` flagged two of them). See where your job actually lands
+workspace has other jobs in it. See where your job actually lands
 against that full list, and whether the specific tag keys/casing you used
 match the convention exactly (a `project` tag and a `Project` tag are two
 different columns in a cost report's `GROUP BY`, not the same thing typed
@@ -141,11 +136,3 @@ monitor object that exists but has never run.
 > history on creation — that's expected, not a hang.
 
 ---
-
-## Where this leaves you
-
-Nothing here was on `docs/final-checklist.md` — that checklist tests
-whether the pipeline itself meets Qubika's standards, not whether you can
-answer for it operationally once it's live. Both are real. This is what
-comes after the checklist, once "does it work" stops being the question
-and "can I account for it" starts being the one that matters.
