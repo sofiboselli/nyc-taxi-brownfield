@@ -37,6 +37,7 @@ Change Data Feed enabled — both are hard requirements for what Step 2
 needs, not optional polish. Read a few of the actual notes in the
 table; they should match `borough_notes.csv` exactly, not a paraphrase
 or a regenerated version of them.
+
 ---
 
 ## Step 2: Make it searchable by meaning, not just keyword
@@ -64,10 +65,19 @@ and reasons through it directly, rather than inventing a fake
 `staging`/`prod` choice just to force the question into a shape that
 fits.
 
+**A different shape than every other step in this series:** this skill
+never executes any Vector Search API calls itself — it only ever
+produces a pre-filled provisioning notebook (index creation, CDF check,
+sample queries, guarded cleanup) that you import into your Databricks
+workspace and run there. Don't expect live query results directly in
+the chat; expect a `.py` notebook file, and expect to do the actual
+running yourself.
+
 **Validation:** the column it embeds must be the actual text column —
 if it points at a primary key or numeric ID instead, that's not a
 config nitpick, it's a broken index that will "work" (return results)
-while returning nonsense. Once it's built, actually query it with:
+while returning nonsense. Once you've imported and run the notebook,
+actually query it with:
 
 > "If a rider was picked up at one of the two NYC airports, would the
 > pricing work the same as everywhere else in that borough?"
