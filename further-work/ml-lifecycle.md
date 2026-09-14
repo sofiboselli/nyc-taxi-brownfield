@@ -65,9 +65,9 @@ like `tip-model`. Check the run's tags for the seven Qubika requires:
 `project`, `team`, `env`, `jira_ticket`, `dataset_version`, `feature`,
 `framework`. If there's no real Jira ticket for this exploratory work,
 that's worth surfacing honestly rather than inventing a ticket ID to fill
-the slot — same principle as declining to fabricate a cost-alert email
-address back in the Governance & Cost module. Confirm it used the
-framework-specific autolog call (`mlflow.sklearn.autolog(...)`, not the
+the slot — a placeholder value defeats the whole point of a tag meant for
+audit. Confirm it used the framework-specific autolog call
+(`mlflow.sklearn.autolog(...)`, not the
 generic `mlflow.autolog()`), since the generic one silently drops
 framework-specific artifacts.
 
@@ -127,8 +127,9 @@ just a "the endpoint exists" confirmation.
 > worth knowing before anyone on this project ever ships a v2 straight to
 > 100%. The inference table this step sets up isn't a one-off either — it
 > feeds directly into `qubika-lakehouse-monitoring`'s `InferenceLog`
-> profile from the Governance & Cost module, if prediction drift over
-> time ever becomes a real question here.
+> profile if prediction drift over time ever becomes a real question
+> here — a different monitor type than a `TimeSeries` monitor on a Delta
+> table, but the same underlying skill.
 
 ---
 

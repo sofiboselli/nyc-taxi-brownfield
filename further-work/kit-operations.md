@@ -13,9 +13,7 @@ you've already done, and reach for fabricated data instead of scavenging
 more real NYC files (or, worse, anything more sensitive) for a test that
 only cares about scale.
 
-**Prerequisite:** Brownfield completed through Iteration 3 — mainly so
-Step 3 has a real schema (`bronze.trips`, `bronze.zones`) to imitate
-rather than inventing one from nothing.
+**Prerequisite:** Brownfield completed through Iteration 3.
 
 ---
 
@@ -26,10 +24,10 @@ Run:
 > `/de-doctor`
 
 **Validation:** read the pass/warn/fail table for real, don't skim past a
-`[!]`. If you did the BI & Analytics module first, you already have a
-real failure to check this against — the Databricks MCP server that
-failed to connect for the dashboard step. See whether `/de-doctor` caught
-it.
+`[!]`. Then check it against something it can't actually see: if any MCP
+server your session depends on has failed to connect — a real, common
+failure mode, not a hypothetical — see whether `/de-doctor` flagged it
+anywhere in the output.
 
 It won't. Read literally, `/de-doctor`'s own documentation lists MCP
 server health as a *future* slice, not yet implemented — the current
