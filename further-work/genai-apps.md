@@ -37,14 +37,6 @@ Change Data Feed enabled — both are hard requirements for what Step 2
 needs, not optional polish. Read a few of the actual notes in the
 table; they should match `borough_notes.csv` exactly, not a paraphrase
 or a regenerated version of them.
-
-> This is genuinely new content this repo didn't have — a small, real
-> text corpus, not a fabricated stand-in for one, provided rather than
-> generated on the fly so what gets indexed in Step 2 is something you
-> can actually read and verify against the source file. Landing it
-> correctly — real PK, CDF enabled, Silver rather than Bronze — is the
-> actual point of this step, not the choice of what to write about.
-
 ---
 
 ## Step 2: Make it searchable by meaning, not just keyword
@@ -62,6 +54,15 @@ rubber-stamp through them; each has a real cost or correctness
 consequence (a `CONTINUOUS` pipeline costs meaningfully more than
 `TRIGGERED` for data that barely changes; the wrong embedding source
 column produces garbage vectors).
+
+The environment question specifically assumes dev/staging/prod always
+exist — this project only has one real catalog, so there's no genuine
+second choice to offer. Don't be surprised if that step errors out or
+gets skipped instead of presenting a clean multi-choice prompt; what
+matters is whether Claude Code recognizes there's no real second option
+and reasons through it directly, rather than inventing a fake
+`staging`/`prod` choice just to force the question into a shape that
+fits.
 
 **Validation:** the column it embeds must be the actual text column —
 if it points at a primary key or numeric ID instead, that's not a
