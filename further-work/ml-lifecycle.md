@@ -17,11 +17,7 @@ tearing it down once you're done exploring, not leaving it running.
 
 **Prerequisite:** Brownfield completed through Iteration 3 —
 `silver.trips` populated, `tip_pct` present. You'll also need a
-Python-capable compute path that can train a small scikit-learn model
-(a cluster, or serverless notebook execution if your workspace supports
-it) — confirm this the same way you confirmed catalog grants back in the
-main README, don't assume it's available.
-
+Python-capable compute path that can train a small scikit-learn model.
 ---
 
 ## Step 1: Where do these inputs actually belong?
@@ -133,13 +129,39 @@ just a "the endpoint exists" confirmation.
 
 ---
 
+## Step 5: Tear it down when you're done
+
+Once you're finished exploring — not before, and don't skip this because
+`scale_to_zero_enabled` was set in Step 4:
+
+> "I'm done with this exercise. Tear down the endpoint so it stops
+> costing anything."
+
+**Validation:** scaling to zero still leaves the endpoint object,
+inference table, and registered model version in place — fine for a real
+project you might come back to, but if the point is "make sure this
+stops costing money," confirm the endpoint is actually deleted, not just
+idle. Check back after: list serving endpoints and confirm this one is
+genuinely gone, rather than trusting the delete call's own "success"
+message. `scale_to_zero_enabled=True` protects you from runaway compute
+cost if you forget this step — it does not protect you from an endpoint
+nobody remembers exists six months from now.
+
+> Per `qubika-mle-model-serving`'s own guidance, scaling to zero rather
+> than deleting is the *default* recommendation — it preserves the
+> serving URL and inference table history for a project that's actually
+> ongoing. Full deletion is explicitly the exception, reserved for
+> retiring the model for good. For a one-off exploration like this one,
+> that exception is the right call.
+
+---
+
 ## Where this leaves you
 
-Four decisions, in order: where the inputs belong (and knowing when the
+Five decisions, in order: where the inputs belong (and knowing when the
 governed answer is "don't use the fancy tool"), a run that's actually
 auditable months from now, an evaluation that can't lie to you by
-grading its own homework, and a deployment nobody can silently break by
-skipping the confirmation step. Unlike every other module in this
-series, this one leaves live, billed infrastructure behind — an endpoint
-that keeps running until someone scales it down or deletes it. Don't
-leave it up once you're done.
+grading its own homework, a deployment nobody can silently break by
+skipping the confirmation step, and — unlike every other module in this
+series — a real teardown at the end, because this is the one module that
+leaves live, billed infrastructure behind if you just walk away.
