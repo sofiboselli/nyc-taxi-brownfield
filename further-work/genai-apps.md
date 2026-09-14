@@ -11,34 +11,39 @@ row of numbers. That's a search problem over text, not a query problem
 over a table, and nothing built so far handles it.
 
 There's no existing text corpus in this repo to search — `silver.trips`
-and `taxi_zone_lookup.csv` are structured data, not prose. So the first
-step here is producing one, deliberately small: not a production
-knowledge base, just enough real written content to prove the retrieval
-flow actually works end to end.
+and `taxi_zone_lookup.csv` are structured data, not prose.
+`further-work/data/borough_notes.csv` provides one: five short,
+real support-style notes, one per NYC borough, each grounded in actual
+counts from `taxi_zone_lookup.csv` (zone counts, the Yellow Zone/Boro
+Zone/Airports split) rather than generic filler. Deliberately small —
+not a production knowledge base, just enough real written content to
+prove the retrieval flow actually works end to end.
 
-**Prerequisite:** Brownfield completed through Iteration 3 — mainly for
-the real borough/zone names in `bronze.zones` this step writes about.
+**Prerequisite:** Brownfield completed through Iteration 3 — mainly so
+the notes' references to real zone/service-zone facts line up with
+what's actually in `bronze.zones`.
 
 ---
 
-## Step 1: Give it something real to search
+## Step 1: Land the notes as a real Silver chunk table
 
 Ask Claude Code:
 
-> "Using the real borough and zone names from `bronze.zones`, write a
-> handful of short support-style reference notes — a paragraph each,
-> the kind of thing a support rep would want on hand. Land them as a
-> proper Silver chunk table, not a Bronze dump."
+> "Land `further-work/data/borough_notes.csv` as a proper Silver chunk
+> table — not a Bronze dump."
 
 **Validation:** check the resulting table has a real primary key and
 Change Data Feed enabled — both are hard requirements for what Step 2
-needs, not optional polish. Read a few of the actual notes; they should
-reference real zone/borough names from the data, not generic filler.
+needs, not optional polish. Read a few of the actual notes in the
+table; they should match `borough_notes.csv` exactly, not a paraphrase
+or a regenerated version of them.
 
 > This is genuinely new content this repo didn't have — a small, real
-> text corpus, not a fabricated stand-in for one. Keep it small on
-> purpose: the point of this module is proving the retrieval flow works,
-> not building a production knowledge base.
+> text corpus, not a fabricated stand-in for one, provided rather than
+> generated on the fly so what gets indexed in Step 2 is something you
+> can actually read and verify against the source file. Landing it
+> correctly — real PK, CDF enabled, Silver rather than Bronze — is the
+> actual point of this step, not the choice of what to write about.
 
 ---
 
