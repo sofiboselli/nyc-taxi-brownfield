@@ -50,10 +50,11 @@ it's the specific thing that makes a restart replay everything from
 scratch or crash on the next schema change.
 
 > Auto Loader alone isn't new here — Iteration 1 already reached for it.
-> What's actually new is the trigger decision. The relevant skill's own
-> framing is blunt about this: most pipelines at Qubika are batch, and
-> streaming (an always-on `processingTime` trigger) is for when the
-> business genuinely needs sub-hourly freshness, not just because files
+> What's actually new is the trigger decision. This is
+> `qubika-streaming-pipelines`, and its own framing is blunt about this:
+> most pipelines at Qubika are batch, and streaming (an always-on
+> `processingTime` trigger) is for when the business genuinely needs
+> sub-hourly freshness, not just because files
 > now arrive more often than once a month.
 
 ---
