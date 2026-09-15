@@ -90,6 +90,11 @@ plain linear model, for instance), confirm the report says so explicitly
 rather than fabricating a chart for a metric the model can't actually
 produce.
 
+If the verdict is `DO NOT PROMOTE`, that's a legitimate place to stop —
+not every idea produces a usable model, and the report's own
+recommendation should say whether to iterate (and on what specifically)
+or abandon it. Only go on to Step 4 if it actually says promotion-ready.
+
 > This is `qubika-ml-model-evaluator` — read-only at the registry level,
 > deliberately. It never promotes anything on its own; it hands back a
 > verdict and it's your call what to do with it. Same "verify, don't
