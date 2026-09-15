@@ -26,7 +26,13 @@ to `bronze.*` or `silver.*` — those aren't curated for someone outside
 the team to query directly.
 
 **Also needed:** a SQL warehouse in the shared workspace, and permission
-to use it.
+to use it. And check `databricks-sdk` in whatever Python environment
+will actually run Step 1's creation code — it needs `>=0.139.0`, a
+verified real requirement, notably higher than what the skill's own
+changelog vaguely implies. Many environments have something much older
+pre-installed (0.67.x, for instance, has no `create_space` method at
+all) — check and upgrade *before* starting, rather than discovering it
+mid-step.
 
 ---
 
@@ -49,15 +55,8 @@ touches `gold.kpi_by_borough_hour`, never `bronze.*`/`silver.*`.
 > language-to-SQL interface built via the Databricks SDK (`w.genie.*`),
 > not a slash command. It needs an explicit `warehouse_id`; Claude Code
 > should confirm which warehouse with you rather than picking one on its
-> own. It also needs `databricks-sdk>=0.139.0` in whatever Python
-> environment actually runs the creation code — a verified real
-> requirement, not a guess. Many environments have something much older
-> pre-installed (0.67.x has no `create_space` method at all), and the
-> skill's own changelog is vague about the actual floor. If Claude Code
-> hits a missing-method error, that's this, not a bug in the payload —
-> expect it to stand up an isolated venv with a current SDK rather than
-> keep guessing at the wire format by hand.
->
+> own. (If you skipped the SDK version check above and hit a
+> missing-method error, that's the cause — not a bug in the payload.)
 > What actually governs what it can answer isn't just the prompt —
 > it's three layers stacking: Unity Catalog grants (can the querying
 > identity even `SELECT` the table), the Space's own configured table

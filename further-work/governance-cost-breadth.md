@@ -30,6 +30,13 @@ in place.
 above. If a query below fails with a permission or "table not found"
 error, that's the fix.
 
+Also check `databricks-sdk` in whatever Python environment will run
+Step 4's monitor-creation code — it needs `>=0.139.0`, a verified real
+requirement, notably higher than the `>=0.28.0` the skill's own
+Prerequisites section states. Check and upgrade before starting Step 4,
+rather than hitting a missing-method or unexpected-signature error
+partway through.
+
 ---
 
 ## Step 1: What does this actually cost?
@@ -133,13 +140,8 @@ monitor object that exists but has never run.
 > repeated: DQX is a per-write quality gate; this is ongoing statistical
 > profiling on data that's already passed those gates. First refresh on a
 > `TimeSeries` monitor can take 10-30 minutes since it profiles prior
-> history on creation — that's expected, not a hang.
->
-> This also needs `databricks-sdk>=0.139.0` in whatever Python
-> environment actually runs the creation code — a verified real
-> requirement, notably higher than the `>=0.28.0` the skill's own
-> Prerequisites section states. If Claude Code hits a missing-method or
-> unexpected-signature error here, that's this gap, not a bug in what it
-> wrote — the skill's stated floor isn't reliable as the real one.
+> history on creation — that's expected, not a hang. (If you skipped the
+> SDK version check above and hit a missing-method error instead, that's
+> the cause — not a bug in what it wrote.)
 
 ---
