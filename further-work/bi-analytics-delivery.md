@@ -49,7 +49,16 @@ touches `gold.kpi_by_borough_hour`, never `bronze.*`/`silver.*`.
 > language-to-SQL interface built via the Databricks SDK (`w.genie.*`),
 > not a slash command. It needs an explicit `warehouse_id`; Claude Code
 > should confirm which warehouse with you rather than picking one on its
-> own. What actually governs what it can answer isn't just the prompt —
+> own. It also needs `databricks-sdk>=0.139.0` in whatever Python
+> environment actually runs the creation code — a verified real
+> requirement, not a guess. Many environments have something much older
+> pre-installed (0.67.x has no `create_space` method at all), and the
+> skill's own changelog is vague about the actual floor. If Claude Code
+> hits a missing-method error, that's this, not a bug in the payload —
+> expect it to stand up an isolated venv with a current SDK rather than
+> keep guessing at the wire format by hand.
+>
+> What actually governs what it can answer isn't just the prompt —
 > it's three layers stacking: Unity Catalog grants (can the querying
 > identity even `SELECT` the table), the Space's own configured table
 > list (only tables you deliberately pointed it at), and how well it's
