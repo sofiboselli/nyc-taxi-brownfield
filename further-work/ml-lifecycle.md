@@ -29,23 +29,10 @@ Ask Claude Code, before it builds anything:
 > Before you build anything, tell me where the model's input features
 > should actually live."
 
-**Validation:** the correct answer here is not the Feature Store — and if
-Claude Code reaches straight for one without weighing that, that's worth
-pushing back on. But don't just check that it landed on "Gold Delta"
-either: `trip_distance`, `passenger_count`, `pickup_hour`, and
-`pickup_borough` already exist as plain columns in `silver.trips` — no
-aggregation, no join, no new derived metric. The feature-engineering
-skill's decision matrix has two different "don't use the Feature Store"
-rows, and they're not interchangeable: "single model, simple
-transformation" → Gold Delta; "trivial derived value from inputs already
-available at inference" → compute in the model/training code, don't
-persist anywhere new. Since nothing here needs transforming, the second
-row is the more correct one to land on — reading straight from
-`silver.trips` with any light reshaping (bucketing, one-hot) done in
-training code, not materialized into a new table. Reaching for the
-fancier, more governed tool by default when there's nothing to govern is
-the actual mistake here — not the absence of ceremony, and not
-necessarily the absence of a Gold table either.
+**Validation:** the correct answer is not the Feature Store — the right
+destination is either Gold Delta or no new table at all (reading
+straight from `silver.trips`) depending on whether any real
+transformation is happening, not a fixed answer either way.
 
 > `qubika-feature-engineering` exists mainly to stop duplicated,
 > ungoverned features when multiple models and teams share a workspace.
