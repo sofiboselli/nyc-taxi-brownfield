@@ -96,6 +96,33 @@ and shipped blind.
 
 ---
 
+## Step 3: Tear down what you built
+
+Same discipline as anything else in this series that leaves real objects
+behind:
+
+> "I'm done exploring. Delete the Genie Space and the dashboard so
+> neither lingers."
+
+**Validation:** confirm both are actually gone — not just moved
+somewhere you'd forget to check — rather than trusting a confirmation
+message. Neither of these two objects spins up dedicated compute the way
+a serving endpoint or a vector search index does — the real cost driver
+here is the shared SQL warehouse, which this module never created and
+shouldn't touch — so this step is about hygiene and attribution, not
+stopping a bill. That's still worth doing: a Space or dashboard nobody
+remembers creating is exactly the kind of clutter that makes "who owns
+this and why does it exist" a harder question to answer later.
+
+One thing worth checking rather than assuming: `qubika-aibi-dashboards`
+documents a dashboard delete action directly (`manage_dashboard(action=
+"delete")`). The Genie skill's common patterns don't document a
+symmetric "delete a Space" call the same way — if Claude Code can't find
+one, confirm it says so and tells you how to remove it manually (the
+workspace UI) rather than quietly leaving the Space in place.
+
+---
+
 ## Where this leaves you
 
 Two different requests, two different tools, and the distinction is real,
@@ -104,4 +131,6 @@ of time; a dashboard is for the fixed, known set you want rendered the
 same way every time. Reach for the wrong one and you either get a rigid
 dashboard someone keeps asking you to add "just one more chart" to, or a
 conversational tool that's the wrong shape for a number someone actually
-wanted to see the same way every Monday without asking.
+wanted to see the same way every Monday without asking. And unlike the
+modules that stand up billed compute, cleaning up here is about not
+leaving orphaned objects behind, not about stopping a meter.
