@@ -16,6 +16,19 @@ variables:
   catalog:
     description: "Unity Catalog catalog for this project"
     default: dev_ai_kit_demo_brownfield
+  env:
+    description: "Deployment environment label used in cost-attribution tags"
+    default: dev
+  # Cost-attribution tags (qubika-compute-tagging). No CI/CD service principal
+  # exists for this project yet -- it's a single dev-target, human-deployed
+  # bundle -- so Owner reflects whoever actually ran the deploy rather than a
+  # fabricated SP name.
+  core_tags:
+    type: complex
+    default:
+      Environment: "${var.env}"
+      Owner: "${workspace.current_user.userName}"
+      ManagedBy: bundles
 
 targets:
   dev:
@@ -23,3 +36,37 @@ targets:
     mode: development
     workspace:
       host: https://dbc-001bbe9b-5a5e.cloud.databricks.com
+    variables:
+      env: dev
+    presets:
+      tags: ${var.core_tags}
+
+  # PLACEHOLDER -- this training exercise only has one real workspace/catalog
+  # (`dev_ai_kit_demo_brownfield`). `validate` passes (it only checks the
+  # bundle's own YAML/variable resolution); `deploy` will fail until a real
+  # staging workspace host and catalog exist and are filled in here.
+  staging:
+    mode: development
+    workspace:
+      host: https://dbc-001bbe9b-5a5e.cloud.databricks.com # CHANGEME: real staging workspace host
+    variables:
+      catalog: dev_ai_kit_demo_brownfield_staging # CHANGEME: doesn't exist yet
+      env: staging
+    presets:
+      tags: ${var.core_tags}
+
+  # PLACEHOLDER -- same caveat as staging, plus mode: production requires a
+  # real service principal (human deploys are blocked by design). Neither
+  # the SP nor the catalog below exist for this exercise.
+  prod:
+    mode: production
+    workspace:
+      host: https://dbc-001bbe9b-5a5e.cloud.databricks.com # CHANGEME: real prod workspace host
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: dev_ai_kit_demo_brownfield_prod # CHANGEME: doesn't exist yet
+      env: prod
+    run_as:
+      service_principal_name: sp-nyc-taxi-brownfield-prod # CHANGEME: doesn't exist yet
+    presets:
+      tags: ${var.core_tags}

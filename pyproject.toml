@@ -1,0 +1,9 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "unit: pure transformation-logic tests, no Delta I/O",
+    "integration: writes to local temp Delta tables to test MERGE/replaceWhere idempotency",
+]

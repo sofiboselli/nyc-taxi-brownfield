@@ -1,36 +1,79 @@
 resources:
   schemas:
-    taxi_legacy:
+    # Per-layer schemas (qubika-medallion-architecture / qubika-unity-catalog-governance
+    # naming: raw / curated / analytics), replacing the earlier flat
+    # `taxi_legacy` schema that distinguished layers only by table-name prefix.
+    raw:
       catalog_name: ${var.catalog}
-      name: taxi_legacy
-      comment: "Legacy NYC taxi pipeline."
+      name: raw
+      comment: "Bronze layer -- faithful copy of the NYC taxi landing files."
+
+    curated:
+      catalog_name: ${var.catalog}
+      name: curated
+      comment: "Silver layer -- cleaned, deduplicated, quality-checked taxi trips."
+
+    quarantine:
+      catalog_name: ${var.catalog}
+      name: quarantine
+      comment: "Rows that failed a critical DQX check on the way into curated."
+
+    analytics:
+      catalog_name: ${var.catalog}
+      name: analytics
+      comment: "Gold layer -- business-ready taxi KPIs."
 
   volumes:
     landing:
       catalog_name: ${var.catalog}
-      # Referencing the schema resource (not the literal string "taxi_legacy")
-      # is what makes Terraform create the schema before the volume --
+      # Referencing the schema resource (not the literal string "raw") is
+      # what makes Terraform create the schema before the volume --
       # `volumes` has no `depends_on` field, this is the supported way to
       # express the same ordering.
-      schema_name: ${resources.schemas.taxi_legacy.name}
+      schema_name: ${resources.schemas.raw.name}
       name: landing
+      volume_type: MANAGED
+
+    checkpoints:
+      catalog_name: ${var.catalog}
+      schema_name: ${resources.schemas.raw.name}
+      name: checkpoints
       volume_type: MANAGED
 
   jobs:
     legacy_taxi_job:
       name: "Taxi Analytics - Legacy"
       # No job_clusters block — these tasks run on serverless compute.
+      # No `Tier` tag: this one job's tasks span all three medallion layers
+      # (ingest/clean/kpi) instead of being split per layer, so a single
+      # bronze/silver/gold value would misattribute cost. Splitting this
+      # into one job per layer is a separate, larger change than the schema
+      # separation done here (which only moved *where the tables live*, not
+      # *how the job is orchestrated*).
+      tags:
+        Project: "nyc-taxi-brownfield-seed"
+        WorkloadType: "batch"
+      email_notifications:
+        on_failure:
+          - sofia.boselli@qubika.com
+      environments:
+        - environment_key: dqx_env
+          spec:
+            client: "1"
+            dependencies:
+              - databricks-labs-dqx
       tasks:
         - task_key: ingest
           notebook_task:
-            notebook_path: ../bronze/ingest_trips.py
+            notebook_path: ../src/bronze/ingest_trips.py
 
         - task_key: clean
           depends_on: [{ task_key: ingest }]
+          environment_key: dqx_env
           notebook_task:
-            notebook_path: ../silver/clean_trips.py
+            notebook_path: ../src/silver/clean_trips.py
 
         - task_key: kpi
           depends_on: [{ task_key: clean }]
           notebook_task:
-            notebook_path: ../gold/kpi_by_borough_hour.py
+            notebook_path: ../src/gold/kpi_by_borough_hour.py
