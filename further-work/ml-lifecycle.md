@@ -18,6 +18,7 @@ tearing it down once you're done exploring, not leaving it running.
 **Prerequisite:** Brownfield completed through Iteration 3 —
 `silver.trips` populated, `tip_pct` present. You'll also need a
 Python-capable compute path that can train a small scikit-learn model.
+
 ---
 
 ## Step 1: Where do these inputs actually belong?
@@ -28,14 +29,23 @@ Ask Claude Code, before it builds anything:
 > Before you build anything, tell me where the model's input features
 > should actually live."
 
-**Validation:** the correct answer here is Gold Delta, not the Feature
-Store — and if Claude Code reaches straight for a Feature Store table
-without weighing that, that's worth pushing back on. Exactly one model
-will ever consume these features; the feature-engineering skill's own
-decision rule is explicit: *"will more than one model ever use this? If
-no, Gold."* Reaching for the fancier, more governed tool by default when
-a plain Gold table is the actually-correct answer is itself the mistake
-here — not the absence of ceremony.
+**Validation:** the correct answer here is not the Feature Store — and if
+Claude Code reaches straight for one without weighing that, that's worth
+pushing back on. But don't just check that it landed on "Gold Delta"
+either: `trip_distance`, `passenger_count`, `pickup_hour`, and
+`pickup_borough` already exist as plain columns in `silver.trips` — no
+aggregation, no join, no new derived metric. The feature-engineering
+skill's decision matrix has two different "don't use the Feature Store"
+rows, and they're not interchangeable: "single model, simple
+transformation" → Gold Delta; "trivial derived value from inputs already
+available at inference" → compute in the model/training code, don't
+persist anywhere new. Since nothing here needs transforming, the second
+row is the more correct one to land on — reading straight from
+`silver.trips` with any light reshaping (bucketing, one-hot) done in
+training code, not materialized into a new table. Reaching for the
+fancier, more governed tool by default when there's nothing to govern is
+the actual mistake here — not the absence of ceremony, and not
+necessarily the absence of a Gold table either.
 
 > `qubika-feature-engineering` exists mainly to stop duplicated,
 > ungoverned features when multiple models and teams share a workspace.
