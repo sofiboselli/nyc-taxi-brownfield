@@ -24,11 +24,15 @@ resources:
         - task_key: ingest
           notebook_task:
             notebook_path: ../bronze/ingest_trips.py
+            base_parameters:
+              catalog: ${var.catalog}
 
         - task_key: clean
           depends_on: [{ task_key: ingest }]
           notebook_task:
             notebook_path: ../silver/clean_trips.py
+            base_parameters:
+              catalog: ${var.catalog}
 
         - task_key: kpi
           depends_on: [{ task_key: clean }]
