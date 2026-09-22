@@ -7,25 +7,21 @@ resources:
       catalog_name: ${var.catalog}
       name: raw
       comment: "Bronze layer -- faithful copy of the NYC taxi landing files."
-      force_destroy: true  # demo-only: lets `bundle destroy` drop this while it still has tables
 
     curated:
       catalog_name: ${var.catalog}
       name: curated
       comment: "Silver layer -- cleaned, deduplicated, quality-checked taxi trips."
-      force_destroy: true
 
     quarantine:
       catalog_name: ${var.catalog}
       name: quarantine
       comment: "Rows that failed a critical DQX check on the way into curated."
-      force_destroy: true
 
     analytics:
       catalog_name: ${var.catalog}
       name: analytics
       comment: "Gold layer -- business-ready taxi KPIs."
-      force_destroy: true
 
   volumes:
     landing:
