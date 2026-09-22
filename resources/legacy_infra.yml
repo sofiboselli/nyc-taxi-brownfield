@@ -4,10 +4,6 @@ resources:
       catalog_name: ${var.catalog}
       name: taxi_legacy
       comment: "Legacy NYC taxi pipeline."
-      # Demo-only: lets `bundle destroy` drop this schema even while it
-      # still has tables in it (which it always will, every switch).
-      # Without this, destroy fails outright the moment a table exists.
-      force_destroy: true
 
   volumes:
     landing:
