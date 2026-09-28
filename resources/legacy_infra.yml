@@ -16,6 +16,14 @@ resources:
       name: landing
       volume_type: MANAGED
 
+    # Auto Loader checkpoints + inferred schemas for Bronze. Kept out of
+    # `landing` so the ingest stream never lists its own state files.
+    checkpoints:
+      catalog_name: ${var.catalog}
+      schema_name: ${resources.schemas.taxi_legacy.name}
+      name: checkpoints
+      volume_type: MANAGED
+
   jobs:
     legacy_taxi_job:
       name: "Taxi Analytics - Legacy"

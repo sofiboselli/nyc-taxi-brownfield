@@ -20,6 +20,7 @@ dbutils.widgets.text("catalog", "dev_ai_kit_demo_brownfield", "Catalog")
 catalog = dbutils.widgets.get("catalog")
 
 landing_path = f"/Volumes/{catalog}/taxi_legacy/landing/"
+checkpoint_path = f"/Volumes/{catalog}/taxi_legacy/checkpoints/"
 bronze_trips_table = f"{catalog}.taxi_legacy.bronze_trips"
 bronze_zones_table = f"{catalog}.taxi_legacy.bronze_zones"
 
@@ -33,10 +34,10 @@ bronze_zones_table = f"{catalog}.taxi_legacy.bronze_zones"
 # MAGIC the next run, and `append` means a second month's file lands alongside
 # MAGIC the first instead of replacing it.
 # MAGIC
-# MAGIC Checkpoints live under the landing volume itself (`_checkpoints/...`) —
-# MAGIC it's the only volume this project provisions today. `pathGlobFilter`
-# MAGIC keeps each stream scoped to its own file extension so the checkpoint
-# MAGIC directories are never mistaken for source data.
+# MAGIC Checkpoints live in their own `checkpoints` volume, not inside
+# MAGIC `landing` — the stream's state never sits in the folder it reads from,
+# MAGIC and re-seeding `landing` can't wipe it. `pathGlobFilter` keeps each
+# MAGIC stream scoped to its own file extension.
 
 # COMMAND ----------
 
@@ -44,14 +45,14 @@ bronze_zones_table = f"{catalog}.taxi_legacy.bronze_zones"
     spark.readStream
     .format("cloudFiles")
     .option("cloudFiles.format", "parquet")
-    .option("cloudFiles.schemaLocation", landing_path + "_checkpoints/bronze_trips/_schema")
+    .option("cloudFiles.schemaLocation", checkpoint_path + "bronze_trips/_schema")
     .option("pathGlobFilter", "*.parquet")
     .load(landing_path)
     .withColumn("_ingested_at", F.current_timestamp())
     .withColumn("_source_file", F.col("_metadata.file_path"))
     .writeStream
     .format("delta")
-    .option("checkpointLocation", landing_path + "_checkpoints/bronze_trips")
+    .option("checkpointLocation", checkpoint_path + "bronze_trips")
     .option("mergeSchema", "true")
     .trigger(availableNow=True)
     .toTable(bronze_trips_table)
@@ -66,14 +67,14 @@ bronze_zones_table = f"{catalog}.taxi_legacy.bronze_zones"
     .option("cloudFiles.format", "csv")
     .option("header", "true")
     .option("cloudFiles.inferColumnTypes", "true")
-    .option("cloudFiles.schemaLocation", landing_path + "_checkpoints/bronze_zones/_schema")
+    .option("cloudFiles.schemaLocation", checkpoint_path + "bronze_zones/_schema")
     .option("pathGlobFilter", "*.csv")
     .load(landing_path)
     .withColumn("_ingested_at", F.current_timestamp())
     .withColumn("_source_file", F.col("_metadata.file_path"))
     .writeStream
     .format("delta")
-    .option("checkpointLocation", landing_path + "_checkpoints/bronze_zones")
+    .option("checkpointLocation", checkpoint_path + "bronze_zones")
     .option("mergeSchema", "true")
     .trigger(availableNow=True)
     .toTable(bronze_zones_table)
