@@ -107,6 +107,11 @@ candidate_rows = (
                 trips["PULocationID"].cast("string"),
                 trips["DOLocationID"].cast("string"),
                 trips["trip_distance"].cast("string"),
+                # Without the amounts, a charge and its reversal (same trip,
+                # amounts negated -- 80 pairs in the Jan sample) hash to the
+                # same trip_id and unique_trip_id quarantines BOTH halves.
+                trips["fare_amount"].cast("string"),
+                trips["total_amount"].cast("string"),
             ),
             256,
         ).alias("trip_id"),
