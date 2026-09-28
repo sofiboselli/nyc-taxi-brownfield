@@ -30,7 +30,7 @@ def build_silver_candidate(trips: DataFrame, zones: DataFrame) -> DataFrame:
 
     `trip_id` is a sha2 hash of the fields that identify a unique trip --
     the raw NYC taxi export has no native trip ID -- so two Bronze rows
-    with identical vendor/pickup/dropoff/location/distance/fare values
+    with identical vendor/pickup/dropoff/location/distance/fare/total values
     collapse to the same `trip_id` (this is intentional: it's how the
     Silver MERGE dedupes true duplicates instead of just re-inserting them).
     """
@@ -46,6 +46,10 @@ def build_silver_candidate(trips: DataFrame, zones: DataFrame) -> DataFrame:
                     trips.DOLocationID.cast("string"),
                     trips.trip_distance.cast("string"),
                     trips.fare_amount.cast("string"),
+                    # A charge and its reversal can match on everything above
+                    # (a $0-fare surcharge reversal negates only the total), so
+                    # total_amount keeps the pair from colliding on trip_id.
+                    trips.total_amount.cast("string"),
                 ),
                 256,
             ).alias("trip_id"),

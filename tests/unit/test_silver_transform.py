@@ -92,7 +92,7 @@ def test_trip_id_distinguishes_different_trips(spark, zones):
 
 def test_identical_natural_key_produces_the_same_trip_id(spark, zones):
     """Two Bronze rows that are true duplicates (identical vendor/pickup/
-    dropoff/locations/distance/fare) must collapse to the same trip_id --
+    dropoff/locations/distance/fare/total) must collapse to the same trip_id --
     that's what lets the Silver MERGE dedupe them instead of double-counting."""
     dup = make_trip()
     trips = spark.createDataFrame([dup, dup], TRIP_COLUMNS)
