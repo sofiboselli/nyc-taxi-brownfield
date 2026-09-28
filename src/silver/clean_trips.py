@@ -29,10 +29,15 @@ from databricks.sdk import WorkspaceClient
 
 from src.transforms.silver_trips import build_silver_candidate, build_dq_rules
 
-bronze_table = "dev_ai_kit_demo_brownfield.raw.trips"
-zones_table = "dev_ai_kit_demo_brownfield.raw.zones"
-silver_table = "dev_ai_kit_demo_brownfield.curated.trips"
-quarantine_table = "dev_ai_kit_demo_brownfield.quarantine.trips"
+# `catalog` comes in as a job base_parameter (resources/legacy_infra.yml) so no
+# environment's catalog is hardcoded; the default only applies to ad-hoc runs.
+dbutils.widgets.text("catalog", "dev_ai_kit_demo_brownfield", "Catalog")  # change to staging or prod for deployment
+catalog = dbutils.widgets.get("catalog")
+
+bronze_table = f"{catalog}.raw.trips"
+zones_table = f"{catalog}.raw.zones"
+silver_table = f"{catalog}.curated.trips"
+quarantine_table = f"{catalog}.quarantine.trips"
 
 spark.sql(f"""
   CREATE TABLE IF NOT EXISTS {silver_table} (

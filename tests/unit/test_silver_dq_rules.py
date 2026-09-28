@@ -32,6 +32,7 @@ def test_rule_set_shape(spark):
         "nn_trip_id",
         "nn_pickup_ts",
         "valid_trip_distance",
+        "valid_fare_amount",
         "valid_passenger_count",
         "valid_pickup_hour",
         "pickup_before_dropoff",
@@ -50,6 +51,7 @@ def test_rule_set_shape(spark):
     assert by_name["unique_trip_id"].columns == ["trip_id"]
     assert by_name["valid_pickup_hour"].check_func_kwargs == {"min_limit": 0, "max_limit": 23}
     assert by_name["valid_trip_distance"].check_func_kwargs == {"limit": 0}
+    assert by_name["valid_fare_amount"].check_func_kwargs == {"limit": 0}
     assert by_name["valid_passenger_count"].check_func_kwargs == {"limit": 0}
 
 
@@ -78,5 +80,14 @@ def test_pickup_hour_range_check_behavior(spark):
 def test_trip_distance_non_negative_check_behavior(spark):
     df = spark.createDataFrame([(-0.1,), (0.0,), (5.0,)], ["trip_distance"])
     condition = is_not_less_than("trip_distance", limit=0)
+    flags = [row[0] is not None for row in df.select(condition).collect()]
+    assert flags == [True, False, False]
+
+
+def test_fare_amount_non_negative_check_behavior(spark):
+    """Negative fares are reversals/refunds, not trips -- they must be flagged
+    (and so quarantined) rather than netting against real revenue in Gold."""
+    df = spark.createDataFrame([(-17.0,), (0.0,), (17.0,)], ["fare_amount"])
+    condition = is_not_less_than("fare_amount", limit=0)
     flags = [row[0] is not None for row in df.select(condition).collect()]
     assert flags == [True, False, False]

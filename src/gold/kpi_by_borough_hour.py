@@ -22,8 +22,13 @@ from pyspark.sql import functions as F
 
 from src.transforms.gold_kpi import compute_kpi
 
-silver_table = "dev_ai_kit_demo_brownfield.curated.trips"
-gold_table = "dev_ai_kit_demo_brownfield.analytics.kpi_by_borough_hour"
+# `catalog` comes in as a job base_parameter (resources/legacy_infra.yml) so no
+# environment's catalog is hardcoded; the default only applies to ad-hoc runs.
+dbutils.widgets.text("catalog", "dev_ai_kit_demo_brownfield", "Catalog")  # change to staging or prod for deployment
+catalog = dbutils.widgets.get("catalog")
+
+silver_table = f"{catalog}.curated.trips"
+gold_table = f"{catalog}.analytics.kpi_by_borough_hour"
 
 spark.sql(f"""
   CREATE TABLE IF NOT EXISTS {gold_table} (

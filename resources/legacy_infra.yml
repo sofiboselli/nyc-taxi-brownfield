@@ -66,14 +66,20 @@ resources:
         - task_key: ingest
           notebook_task:
             notebook_path: ../src/bronze/ingest_trips.py
+            base_parameters:
+              catalog: ${var.catalog}
 
         - task_key: clean
           depends_on: [{ task_key: ingest }]
           environment_key: dqx_env
           notebook_task:
             notebook_path: ../src/silver/clean_trips.py
+            base_parameters:
+              catalog: ${var.catalog}
 
         - task_key: kpi
           depends_on: [{ task_key: clean }]
           notebook_task:
             notebook_path: ../src/gold/kpi_by_borough_hour.py
+            base_parameters:
+              catalog: ${var.catalog}

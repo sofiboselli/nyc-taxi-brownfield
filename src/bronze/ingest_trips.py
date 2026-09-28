@@ -19,8 +19,15 @@
 
 from pyspark.sql import functions as F
 
-landing_path = "/Volumes/dev_ai_kit_demo_brownfield/raw/landing/"
-checkpoint_path = "/Volumes/dev_ai_kit_demo_brownfield/raw/checkpoints/trips/"
+# `catalog` comes in as a job base_parameter (resources/legacy_infra.yml) so no
+# environment's catalog is hardcoded; the default only applies to ad-hoc runs.
+dbutils.widgets.text("catalog", "dev_ai_kit_demo_brownfield", "Catalog")  # change to staging or prod for deployment
+catalog = dbutils.widgets.get("catalog")
+
+landing_path = f"/Volumes/{catalog}/raw/landing/"
+checkpoint_path = f"/Volumes/{catalog}/raw/checkpoints/trips/"
+trips_table = f"{catalog}.raw.trips"
+zones_table = f"{catalog}.raw.zones"
 
 (
     spark.readStream
@@ -37,7 +44,7 @@ checkpoint_path = "/Volumes/dev_ai_kit_demo_brownfield/raw/checkpoints/trips/"
     .option("mergeSchema", "true")
     .outputMode("append")
     .trigger(availableNow=True)
-    .toTable("dev_ai_kit_demo_brownfield.raw.trips")
+    .toTable(trips_table)
     .awaitTermination()
 )
 
@@ -48,11 +55,9 @@ zones = (
     .withColumn("_ingested_at", F.current_timestamp())
     .withColumn("_source_file", F.col("_metadata.file_path"))
 )
-zones.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable(
-    "dev_ai_kit_demo_brownfield.raw.zones"
-)
+zones.write.mode("overwrite").option("overwriteSchema", "true").saveAsTable(zones_table)
 
-trips_count = spark.table("dev_ai_kit_demo_brownfield.raw.trips").count()
+trips_count = spark.table(trips_table).count()
 print(f"raw.trips: {trips_count} rows (cumulative)")
 print(f"raw.zones: {zones.count()} rows")
 

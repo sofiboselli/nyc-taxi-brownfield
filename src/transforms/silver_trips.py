@@ -84,6 +84,15 @@ def build_dq_rules() -> list[DQRowRule | DQDatasetRule]:
             check_func=is_not_less_than,
             check_func_kwargs={"limit": 0},
         ),
+        # ~1,957 rows in the Jan sample carry a negative fare: reversals/refunds
+        # of an earlier charge, not real trips. Quarantined so they can't net
+        # against real revenue in Gold.
+        DQRowRule(
+            name="valid_fare_amount",
+            column="fare_amount",
+            check_func=is_not_less_than,
+            check_func_kwargs={"limit": 0},
+        ),
         DQRowRule(
             name="valid_passenger_count",
             column="passenger_count",
